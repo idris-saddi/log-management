@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.idris</groupId>
-	<artifactId>service2</artifactId>
+	<artifactId>log-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>service2</name>
-	<description>Demo project for Spring Boot</description>
+	<name>log-service</name>
+	<description>Consumes Kafka logs and sends them to Graylog via GELF</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -41,30 +41,32 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Kafka producer support -->
+		<!-- Kafka consumer -->
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
 		</dependency>
 
-		<!-- JSON handling (for structured logs) -->
+		<!-- GELF log sender (via Logstash/GELF encoder) -->
+		<dependency>
+			<groupId>biz.paluch.logging</groupId>
+			<artifactId>logstash-gelf</artifactId>
+			<version>1.14.0</version>
+		</dependency>
+
+		<!-- JSON support -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
-		<!-- Logging -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-logging</artifactId>
-		</dependency>
-
-				<!-- Logback JSON logging -->
+		<!-- Logback JSON logging -->
 		<dependency>
 			<groupId>net.logstash.logback</groupId>
 			<artifactId>logstash-logback-encoder</artifactId>
 			<version>7.3</version>
 		</dependency>
+
 	</dependencies>
 
 	<build>
