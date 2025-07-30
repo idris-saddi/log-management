@@ -1,20 +1,33 @@
 <configuration>
-    <appender name="GELF" class="de.siegmar.logbackgelf.GelfTcpAppender">
-        <graylogHost>${GRAYLOG_HOST}</graylogHost>
-        <port>${GRAYLOG_PORT}</port>
-        <connectTimeoutMillis>1000</connectTimeoutMillis>
-        <reconnectDelayMillis>500</reconnectDelayMillis>
 
-        <encoder class="de.siegmar.logbackgelf.GelfEncoder">
-            <includeLogLevel>true</includeLogLevel>
-            <includeLoggerName>true</includeLoggerName>
-            <includeThreadName>true</includeThreadName>
-            <includeSource>true</includeSource>
-            <includeFormattedMessage>true</includeFormattedMessage>
+    <!-- Console fallback appender -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
+    <!-- GELF TCP Appender for Graylog -->
+    <appender name="GELF-TCP" class="de.siegmar.logbackgelf.GelfTcpAppender">
+        <graylogHost>graylog</graylogHost> <!-- nom du service Docker -->
+        <port>12201</port>
+        <connectTimeout>3000</connectTimeout>
+        <reconnectDelay>2000</reconnectDelay>
+        <queueSize>512</queueSize>
+
+        <encoder class="de.siegmar.logbackgelf.GelfEncoder">
+            <facility>log-service</facility>
+            <includeLoggerName>true</includeLoggerName>
+            <includeThreadName>true</includeThreadName>
+            <includeMdcData>true</includeMdcData>
+            <includeExceptionCause>true</includeExceptionCause>
+        </encoder>
+    </appender>
+
+    <!-- Root logger with both appenders -->
     <root level="INFO">
-        <appender-ref ref="GELF"/>
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="GELF-TCP" />
     </root>
+
 </configuration>

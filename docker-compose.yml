@@ -1,0 +1,127 @@
+networks:
+  graynet:
+    driver: bridge
+
+volumes:
+  mongo_data:
+  log_data:
+  graylog_data:
+
+services:
+  # MongoDB for Graylog
+  mongo:
+    image: mongo:6.0.5-jammy
+    container_name: mongodb
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - graynet
+
+  # OpenSearch for Graylog
+  opensearch:
+    image: opensearchproject/opensearch:2
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=5jB6V9TR4JcXkNg*
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+    volumes:
+      - log_data:/usr/share/opensearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - 9200:9200
+    networks:
+      - graynet
+
+
+  # Graylog
+  graylog:
+    image: graylog/graylog:6.3
+    container_name: graylog
+    environment:
+      GRAYLOG_PASSWORD_SECRET: "somepasswordpepper"
+      GRAYLOG_ROOT_PASSWORD_SHA2: "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918" # password: admin
+      GRAYLOG_HTTP_BIND_ADDRESS: "0.0.0.0:9000"
+      GRAYLOG_HTTP_EXTERNAL_URI: "http://localhost:9000/"
+      GRAYLOG_ELASTICSEARCH_HOSTS: "http://opensearch:9200"
+      GRAYLOG_MONGODB_URI: "mongodb://mongodb:27017/graylog"
+    entrypoint: /usr/bin/tini -- wait-for-it opensearch:9200 -- /docker-entrypoint.sh
+    volumes:
+      - .config/graylog.conf:/usr/share/graylog/config/graylog.conf
+      - graylog_data:/usr/share/graylog/data
+    depends_on:
+      - opensearch
+      - mongo
+    ports:
+      - 9000:9000
+      - 12201:12201/udp
+      - 12201:12201/tcp
+    networks:
+      - graynet
+
+  # Zookeeper
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.3  # Compatible with ARM64
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - graynet
+
+
+  # Kafka
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - zookeeper
+    networks:
+      - graynet
+
+  # Service 1
+  service1:
+    build:
+      context: ./service1
+    depends_on:
+      - kafka
+    networks:
+      - graynet
+
+  # Service 2
+  service2:
+    build:
+      context: ./service2
+    depends_on:
+      - kafka
+    networks:
+      - graynet
+
+  # Log Service (consumer + forwarder to Graylog)
+  log-service:
+    build:
+      context: ./log-service
+    environment:
+    - GRAYLOG_HOST=graylog
+    - GRAYLOG_PORT=12201
+
+    depends_on:
+      - kafka
+      - graylog
+    networks:
+      - graynet
