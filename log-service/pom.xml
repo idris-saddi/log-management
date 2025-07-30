@@ -47,13 +47,6 @@
 			<artifactId>spring-kafka</artifactId>
 		</dependency>
 
-		<!-- GELF log sender (via Logstash/GELF encoder) -->
-		<dependency>
-			<groupId>biz.paluch.logging</groupId>
-			<artifactId>logstash-gelf</artifactId>
-			<version>1.14.0</version>
-		</dependency>
-
 		<!-- JSON support -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -67,6 +60,23 @@
 			<version>7.3</version>
 		</dependency>
 
+		<!-- GELF appender for Logback -->
+		<dependency>
+			<groupId>org.graylog2</groupId>
+			<artifactId>gelfclient</artifactId>
+			<version>1.5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>de.siegmar</groupId>
+			<artifactId>logback-gelf</artifactId>
+			<version>3.0.0</version> <!-- or latest version -->
+		</dependency>
+
+				<!-- Spring Boot Web -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

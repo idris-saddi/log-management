@@ -1,11 +1,17 @@
 version: '3'
 
+networks:
+  graynet:
+    external: true
+
 services:
   zookeeper:
     image: wurstmeister/zookeeper
     platform: linux/amd64
     ports:
       - "2181:2181"
+    networks:
+      - graynet
 
   kafka:
     image: wurstmeister/kafka

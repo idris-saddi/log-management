@@ -1,0 +1,20 @@
+<configuration>
+    <appender name="GELF" class="de.siegmar.logbackgelf.GelfTcpAppender">
+        <graylogHost>${GRAYLOG_HOST}</graylogHost>
+        <port>${GRAYLOG_PORT}</port>
+        <connectTimeoutMillis>1000</connectTimeoutMillis>
+        <reconnectDelayMillis>500</reconnectDelayMillis>
+
+        <encoder class="de.siegmar.logbackgelf.GelfEncoder">
+            <includeLogLevel>true</includeLogLevel>
+            <includeLoggerName>true</includeLoggerName>
+            <includeThreadName>true</includeThreadName>
+            <includeSource>true</includeSource>
+            <includeFormattedMessage>true</includeFormattedMessage>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="GELF"/>
+    </root>
+</configuration>
