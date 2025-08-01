@@ -6,6 +6,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+
 
 import org.graylog2.gelfclient.*;
 import org.graylog2.gelfclient.transport.GelfTransport;
@@ -15,16 +17,21 @@ import org.springframework.beans.factory.DisposableBean;
 import java.net.InetSocketAddress;
 import java.time.Instant;
 
+
 @Service
 public class KafkaLogConsumer implements InitializingBean, DisposableBean {
 
     private static final Log logger = LogFactory.getLog(KafkaLogConsumer.class);
 
+    @Value("${graylog.host}")
     private String graylogHost;
 
+    @Value("${graylog.port}")
     private int graylogPort;
 
+    @Value("${graylog.protocol}")
     private String graylogProtocol;
+
 
     private GelfTransport transport;
 
