@@ -2,7 +2,6 @@ package com.idris.log_service.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -21,13 +20,10 @@ public class KafkaLogConsumer implements InitializingBean, DisposableBean {
 
     private static final Log logger = LogFactory.getLog(KafkaLogConsumer.class);
 
-    @Value("${graylog.host}")
     private String graylogHost;
 
-    @Value("${graylog.port}")
     private int graylogPort;
 
-    @Value("${graylog.protocol}")
     private String graylogProtocol;
 
     private GelfTransport transport;

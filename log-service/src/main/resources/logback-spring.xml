@@ -15,13 +15,13 @@
         <reconnectDelay>2000</reconnectDelay>
         <queueSize>512</queueSize>
 
-        <encoder class="de.siegmar.logbackgelf.GelfEncoder">
+        <!-- <encoder class="de.siegmar.logbackgelf.GelfEncoder">
             <facility>log-service</facility>
             <includeLoggerName>true</includeLoggerName>
             <includeThreadName>true</includeThreadName>
             <includeMdcData>true</includeMdcData>
             <includeExceptionCause>true</includeExceptionCause>
-        </encoder>
+        </encoder> -->
     </appender>
 
     <!-- Root logger with both appenders -->
