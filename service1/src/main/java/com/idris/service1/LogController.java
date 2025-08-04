@@ -1,30 +1,6 @@
-// package com.idris.service1;
-
-// import java.time.LocalDateTime;
-// import org.springframework.http.ResponseEntity;
-// import org.springframework.kafka.core.KafkaTemplate;
-// import org.springframework.web.bind.annotation.*;
-
-// @RestController
-// @RequestMapping("/log")
-// public class LogController {
-
-//     private final KafkaTemplate<String, String> kafkaTemplate;
-
-//     public LogController(KafkaTemplate<String, String> kafkaTemplate) {
-//         this.kafkaTemplate =     kafkaTemplate;
-//     }
-
-//     @GetMapping
-//     public ResponseEntity<String> log(@RequestParam(defaultValue = "Test log message") String message) {
-//         String logMessage = "[" + LocalDateTime.now() + "] " + message;
-//         kafkaTemplate.send("logs", logMessage);
-//         return ResponseEntity.ok("Log sent to Kafka: " + logMessage);
-//     }
-// }
-
 package com.idris.service1;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +18,9 @@ public class LogController {
         this.kafkaTemplate = kafkaTemplate;
     }
 
+    @Value("${spring.application.name}")
+    private String applicationName;
+
     @PostMapping
     public ResponseEntity<?> postLog(@RequestParam(defaultValue = "Test log message") String message) {
         try {
@@ -49,7 +28,7 @@ public class LogController {
             log.put("timestamp", java.time.Instant.now().toString());
             log.put("message", message);
             log.put("level", "INFO");
-            log.put("service", "service1");
+            log.put("service", applicationName);
 
             String logJson = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(log);
             kafkaTemplate.send("logs", logJson);
@@ -66,7 +45,7 @@ public class LogController {
             log.put("timestamp", java.time.Instant.now().toString());
             log.put("message", message);
             log.put("level", "INFO");
-            log.put("service", "service1");
+            log.put("service", applicationName);
 
             String logJson = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(log);
             kafkaTemplate.send("logs", logJson);
