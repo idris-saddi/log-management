@@ -61,16 +61,14 @@ services:
       - mongo
     ports:
       - 9000:9000
-      - 12201:12201/tcp    # GELF TCP
-      - 12202:12202/udp    # GELF UDP
+      - 12201:12201/tcp    # GELF TCP only
     networks:
       - graynet
-
+      
   graylog-init:
-    image: curlimages/curl:8.8.0
-    volumes:
-      - ./graylog-init.sh:/init.sh
-    entrypoint: sh /init.sh
+    build:
+      context: .
+      dockerfile: graylog-init.Dockerfile
     depends_on:
       - graylog
     networks:
