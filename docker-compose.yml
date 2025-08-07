@@ -66,6 +66,7 @@ services:
       - graynet
       
   graylog-init:
+    container_name: graylog-init
     build:
       context: .
       dockerfile: graylog-init.Dockerfile
@@ -78,6 +79,7 @@ services:
   # Zookeeper
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.3  # Compatible with ARM64
+    container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -106,30 +108,9 @@ services:
     networks:
       - graynet
 
-  # Service 1
-  service1:
-    build:
-      context: ./service1
-    depends_on:
-      - kafka
-    ports:
-      - "8081:8081"
-    networks:
-      - graynet
-
-  # Service 2
-  service2:
-    build:
-      context: ./service2
-    depends_on:
-      - kafka
-    ports:
-      - "8082:8082"
-    networks:
-      - graynet
-
   # Log Service (consumer + forwarder to Graylog)
   log-service:
+    container_name: log-service
     build:
       context: ./log-service
     environment:
@@ -141,5 +122,31 @@ services:
       - graylog
     ports:
       - "8083:8083"
+    networks:
+      - graynet
+
+  # Service 1
+  service1:
+    container_name: service1
+    build:
+      context: ./service1
+    depends_on:
+      - kafka
+      - log-service
+    ports:
+      - "8081:8081"
+    networks:
+      - graynet
+
+  # Service 2
+  service2:
+    container_name: service2
+    build:
+      context: ./service2
+    depends_on:
+      - kafka
+      - log-service
+    ports:
+      - "8082:8082"
     networks:
       - graynet
