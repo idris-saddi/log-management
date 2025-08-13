@@ -172,42 +172,47 @@ for SERVICE in $SERVICES; do
     --arg service "$SERVICE" \
     '{
       ($qid): {
+        "selected_fields": [],
+        "static_message_list_id": null,
+        "titles": {},
         "widgets": [
           {
             "id": "widget-1",
             "type": "SEARCH_RESULT_COUNT",
             "filter": "",
-            "timerange": {"type": "relative","range":300},
+            "filters": [],
+            "timerange": {"type":"relative","range":300},
             "query": {"type":"elasticsearch","query_string": ("service:" + $service)},
             "streams": [],
-            "filters": [],
+            "stream_categories": [],
             "config": {}
           },
           {
             "id": "widget-2",
             "type": "SEARCH_RESULT_COUNT",
             "filter": "",
-            "timerange": {"type": "relative","range":300},
+            "filters": [],
+            "timerange": {"type":"relative","range":300},
             "query": {"type":"elasticsearch","query_string": ("service:" + $service + " AND level:ERROR")},
             "streams": [],
-            "filters": [],
+            "stream_categories": [],
             "config": {}
           }
         ],
-        "positions": {
-          "widget-1": {"col":1,"row":1,"height":1,"width":1},
-          "widget-2": {"col":2,"row":1,"height":1,"width":1}
-        },
-        "titles": {},
-        "formatting": {},
-        "display_mode_settings": {},
         "widget_mapping": {},
-        "selected_fields": []
+        "positions": {
+          "widget-1":{"col":1,"row":1,"height":1,"width":1},
+          "widget-2":{"col":2,"row":1,"height":1,"width":1}
+        },
+        "formatting": {"highlighting":[]},
+        "display_mode_settings":{"positions":{}}
       }
     }')
 
+
+
   EXISTING_VIEW=$(curl -s -u "$AUTH" "$GRAYLOG_URL/api/views/$DASHBOARD_ID")
-  MERGED_VIEW=$(echo "$EXISTING_VIEW" | jq --argjson frag "$NEW_STATE" '.state = ((.state // {}) + $frag)')
+  MERGED_VIEW=$(echo "$EXISTING_VIEW" | jq --argjson frag "$NEW_STATE" '.state = (.state // {}) * $frag')
 
   UPDATE_RESPONSE=$(curl -s -u "$AUTH" -X PUT "$GRAYLOG_URL/api/views/$DASHBOARD_ID" \
     -H "Content-Type: application/json" -H "X-Requested-By: cli" \
