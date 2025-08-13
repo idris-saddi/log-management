@@ -1,7 +1,4 @@
 #!/bin/sh
-
-# Set -e will stop the script on first error, which is often what you want.
-# pipefail will stop if a command in a pipeline fails.
 set -eu pipefail
 
 echo "✅ Bash is working with pipefail!"
@@ -9,11 +6,6 @@ echo "✅ Bash is working with pipefail!"
 GRAYLOG_URL="http://graylog:9000"
 AUTH="admin:admin"
 SERVICES="service1 service2" # Add more service names here
-
-# 🧪 Generate a 24-character hex ID (compatible with ObjectID)
-generate_id() {
-  openssl rand -hex 12
-}
 
 echo "🕒 Waiting for Graylog API..."
 until curl -s -u "$AUTH" "$GRAYLOG_URL/api/system/inputs" > /dev/null; do
@@ -35,7 +27,6 @@ GELF_PAYLOAD='{
   "global": true,
   "node": null
 }'
-# Using '--data' instead of '-d' for better compatibility with multiline strings
 GELF_RESPONSE=$(curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/system/inputs" \
   -H "Content-Type: application/json" \
   -H "X-Requested-By: cli" \
@@ -44,7 +35,7 @@ GELF_RESPONSE=$(curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/system/inputs" \
 echo "Raw GELF input creation response:"
 echo "$GELF_RESPONSE"
 
-# 📦 Get default index set ID
+# Get default index set ID
 DEFAULT_INDEX_SET_ID=$(curl -s -u "$AUTH" "$GRAYLOG_URL/api/system/indices/index_sets" \
   | jq -r '.index_sets[] | select(.default == true) | .id // empty')
 
@@ -71,26 +62,22 @@ for SERVICE in $SERVICES; do
       "index_set_id": $index_set_id,
       "remove_matches_from_default_stream": false
     }')
-  echo "Payload to create stream:"
-  echo "$STREAM_PAYLOAD"
+
   STREAM_RESPONSE=$(curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/streams" \
     -H "Content-Type: application/json" \
     -H "X-Requested-By: cli" \
     --data "$STREAM_PAYLOAD")
-
   echo "Raw stream creation response:"
   echo "$STREAM_RESPONSE"
 
   STREAM_ID=$(echo "$STREAM_RESPONSE" | jq -r '.id // .stream_id // empty')
-
   if [ -z "$STREAM_ID" ]; then
-    echo "❌ Failed to create stream for $SERVICE. See response above."
+    echo "❌ Failed to create stream for $SERVICE."
     continue
   fi
-
   echo "✅ Created stream for $SERVICE with ID: $STREAM_ID"
 
-  # 2. Add rule to stream
+  # 2. Add stream rule
   RULE_PAYLOAD=$(jq -n \
     --arg service "$SERVICE" \
     '{
@@ -99,22 +86,18 @@ for SERVICE in $SERVICES; do
       "type": 1,
       "inverted": false
     }')
-  echo "Payload to create stream rule:"
-  echo "$RULE_PAYLOAD"
   curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/streams/$STREAM_ID/rules" \
     -H "Content-Type: application/json" \
     -H "X-Requested-By: cli" \
     --data "$RULE_PAYLOAD"
-
   echo "✅ Added rule to stream for $SERVICE"
 
   # 3. Enable stream
   curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/streams/$STREAM_ID/resume" \
     -H "X-Requested-By: cli"
-
   echo "✅ Enabled stream for $SERVICE"
 
-  # 4. Create a search
+  # 4. Create search
   SEARCH_PAYLOAD=$(jq -n \
     --arg stream_id "$STREAM_ID" \
     --arg service "$SERVICE" \
@@ -137,31 +120,24 @@ for SERVICE in $SERVICES; do
           "search_types": []
         }
       ]
-    }'
-  )
-
-
-  echo "🔎 Creating search for $SERVICE..."
+    }')
   SEARCH_RESPONSE=$(curl -s -u "$AUTH" \
     -H "Content-Type: application/json" \
     -H "X-Requested-By: cli" \
     -X POST "$GRAYLOG_URL/api/views/search" \
     --data-raw "$SEARCH_PAYLOAD")
-  
   echo "Raw search creation response:"
   echo "$SEARCH_RESPONSE"
 
   SEARCH_ID=$(echo "$SEARCH_RESPONSE" | jq -r '.id // empty')
-
-  if [ -z "$SEARCH_ID" ]; then
-    echo "❌ Failed to create search for $SERVICE. See response above."
+  QUERY_ID=$(echo "$SEARCH_RESPONSE" | jq -r '.queries[0].id // empty')
+  if [ -z "$SEARCH_ID" ] || [ -z "$QUERY_ID" ]; then
+    echo "❌ Failed to create search for $SERVICE."
     exit 1
   fi
+  echo "✅ Search created with ID: $SEARCH_ID (query ID: $QUERY_ID)"
 
-  echo "✅ Search created with ID: $SEARCH_ID"
-
-  # 5. Create a blank Dashboard (View)
-  # Now we use the newly created searchId.
+  # 5. Create dashboard
   DASHBOARD_PAYLOAD=$(jq -n \
     --arg service "$SERVICE" \
     --arg search_id "$SEARCH_ID" \
@@ -174,117 +150,77 @@ for SERVICE in $SERVICES; do
       state: {},
       share_request: null,
       favorite: false
-    }'
-  )
-
-  echo "📊 Creating dashboard for $SERVICE..."
-  echo "Payload to create dashboard:"
-  echo "$DASHBOARD_PAYLOAD"
-
+    }')
   CREATE_DASHBOARD_RESPONSE=$(curl -s -u "$AUTH" \
     -H "Content-Type: application/json" \
     -H "X-Requested-By: cli" \
     -X POST "$GRAYLOG_URL/api/views" \
     --data-raw "$DASHBOARD_PAYLOAD")
-
   echo "Raw dashboard creation response:"
   echo "$CREATE_DASHBOARD_RESPONSE"
 
   DASHBOARD_ID=$(echo "$CREATE_DASHBOARD_RESPONSE" | jq -r '.id // empty')
-
   if [ -z "$DASHBOARD_ID" ]; then
-    echo "❌ Failed to create dashboard for $SERVICE. See response above."
+    echo "❌ Failed to create dashboard for $SERVICE."
     exit 1
-  else
-    echo "✅ Dashboard created with ID: $DASHBOARD_ID"
   fi
+  echo "✅ Dashboard created with ID: $DASHBOARD_ID"
 
-  # # Widget a: Total logs (5min)
-  # echo "📊 Adding widgets to $SERVICE Dashboard..."
+  # 6. Add widgets to the dashboard state (using correct QUERY_ID)
+  NEW_STATE=$(jq -n \
+    --arg qid "$QUERY_ID" \
+    --arg service "$SERVICE" \
+    '{
+      ($qid): {
+        "widgets": [
+          {
+            "id": "widget-1",
+            "type": "SEARCH_RESULT_COUNT",
+            "filter": "",
+            "timerange": {"type": "relative","range":300},
+            "query": {"type":"elasticsearch","query_string": ("service:" + $service)},
+            "streams": [],
+            "filters": [],
+            "config": {}
+          },
+          {
+            "id": "widget-2",
+            "type": "SEARCH_RESULT_COUNT",
+            "filter": "",
+            "timerange": {"type": "relative","range":300},
+            "query": {"type":"elasticsearch","query_string": ("service:" + $service + " AND level:ERROR")},
+            "streams": [],
+            "filters": [],
+            "config": {}
+          }
+        ],
+        "positions": {
+          "widget-1": {"col":1,"row":1,"height":1,"width":1},
+          "widget-2": {"col":2,"row":1,"height":1,"width":1}
+        },
+        "titles": {},
+        "formatting": {},
+        "display_mode_settings": {},
+        "widget_mapping": {},
+        "selected_fields": []
+      }
+    }')
 
-  # curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/dashboards/$DASHBOARD_ID/widgets" \
-  #   -H "Content-Type: application/json" \
-  #   -H "X-Requested-By: cli" \
-  #   -d "{
-  #     \"description\": \"Total Logs (5min)\",
-  #     \"type\": \"SEARCH_RESULT_COUNT\",
-  #     \"cache_time\": 10,
-  #     \"config\": {
-  #       \"query\": \"service:$SERVICE\",
-  #       \"timerange\": { \"type\": \"relative\", \"range\": 300 }
-  #     },
-  #     \"col\": 0,
-  #     \"row\": 0
-  #   }"
+  EXISTING_VIEW=$(curl -s -u "$AUTH" "$GRAYLOG_URL/api/views/$DASHBOARD_ID")
+  MERGED_VIEW=$(echo "$EXISTING_VIEW" | jq --argjson frag "$NEW_STATE" '.state = ((.state // {}) + $frag)')
 
-  # # Widget b: Error logs
-  # curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/dashboards/$DASHBOARD_ID/widgets" \
-  #   -H "Content-Type: application/json" \
-  #   -H "X-Requested-By: cli" \
-  #   -d "{
-  #     \"description\": \"Error Logs (5min)\",
-  #     \"type\": \"SEARCH_RESULT_COUNT\",
-  #     \"cache_time\": 10,
-  #     \"config\": {
-  #       \"query\": \"service:$SERVICE AND level:ERROR\",
-  #       \"timerange\": { \"type\": \"relative\", \"range\": 300 }
-  #     },
-  #     \"col\": 1,
-  #     \"row\": 0
-  #   }"
+  UPDATE_RESPONSE=$(curl -s -u "$AUTH" -X PUT "$GRAYLOG_URL/api/views/$DASHBOARD_ID" \
+    -H "Content-Type: application/json" -H "X-Requested-By: cli" \
+    --data-raw "$MERGED_VIEW")
+  echo "Merged update response:"
+  echo "$UPDATE_RESPONSE"
 
-  # # Widget c: Log volume over time
-  # curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/dashboards/$DASHBOARD_ID/widgets" \
-  #   -H "Content-Type: application/json" \
-  #   -H "X-Requested-By: cli" \
-  #   -d "{
-  #     \"description\": \"Log Volume Over Time (10min)\",
-  #     \"type\": \"HISTOGRAM\",
-  #     \"cache_time\": 10,
-  #     \"config\": {
-  #       \"query\": \"service:$SERVICE\",
-  #       \"timerange\": { \"type\": \"relative\", \"range\": 600 },
-  #       \"interval\": \"minute\"
-  #     },
-  #     \"col\": 0,
-  #     \"row\": 1
-  #   }"
+  echo "🎉 $SERVICE setup complete!"
+done
 
-  # # Widget d: Level breakdown
-  # curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/dashboards/$DASHBOARD_ID/widgets" \
-  #   -H "Content-Type: application/json" \
-  #   -H "X-Requested-By: cli" \
-  #   -d "{
-  #     \"description\": \"Log Levels Breakdown\",
-  #     \"type\": \"QUICKVALUES\",
-  #     \"cache_time\": 10,
-  #     \"config\": {
-  #       \"field\": \"level\",
-  #       \"query\": \"service:$SERVICE\",
-  #       \"timerange\": { \"type\": \"relative\", \"range\": 300 }
-  #     },
-  #     \"col\": 1,
-  #     \"row\": 1
-  #   }"
+echo "🚀 All services successfully configured in Graylog."
 
-  # # Widget e: Latest logs table
-  # curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/dashboards/$DASHBOARD_ID/widgets" \
-  #   -H "Content-Type: application/json" \
-  #   -H "X-Requested-By: cli" \
-  #   -d "{
-  #     \"description\": \"Latest Logs\",
-  #     \"type\": \"MESSAGE_TABLE\",
-  #     \"cache_time\": 10,
-  #     \"config\": {
-  #       \"query\": \"service:$SERVICE\",
-  #       \"fields\": [\"timestamp\", \"level\", \"message\", \"user_id\"],
-  #       \"limit\": 20,
-  #       \"sort\": [{\"field\": \"timestamp\", \"order\": \"desc\"}],
-  #       \"timerange\": { \"type\": \"relative\", \"range\": 300 }
-  #     },
-  #     \"col\": 0,
-  #     \"row\": 2
-  #   }"
+# --- end drop-in ---
 
   # # 6. Create event definition
   # EVENT_DEF_RESPONSE=$(curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/events/definitions" \
@@ -343,7 +279,7 @@ for SERVICE in $SERVICES; do
   #   -H "X-Requested-By: cli" \
   #   -d "[ { \"notification_id\": \"$NOTIF_ID\" } ]"
 
-  echo "🎉 $SERVICE setup complete!"
-done
+#   echo "🎉 $SERVICE setup complete!"
+# done
 
-echo "🚀 All services successfully configured in Graylog."
+# echo "🚀 All services successfully configured in Graylog."
