@@ -117,9 +117,10 @@ for SERVICE in $SERVICES; do
   STREAM_ID=$(echo "$STREAM_RESPONSE" | jq -r '.id // .stream_id // empty')
   if [ -z "$STREAM_ID" ]; then
     echo "❌ Failed to create stream for $SERVICE."
-    continue
+    exit 1
+  else
+    echo "✅ Created stream for $SERVICE with ID: $STREAM_ID"
   fi
-  echo "✅ Created stream for $SERVICE with ID: $STREAM_ID"
 
   #
   # 2. Add Stream Rule
@@ -282,7 +283,7 @@ for SERVICE in $SERVICES; do
                   "type": "time",
                   "interval": {
                     "type": "timeunit",
-                    "timeunit": "1m",
+                    "timeunit": "1m"
                   }
                 }
               ],
@@ -350,7 +351,7 @@ for SERVICE in $SERVICES; do
                 {
                   "type": "pivot",
                   "field": "count()",
-                  "direction": "desc"
+                  "direction": "Descending"
                 }
               ]
             }
@@ -364,8 +365,15 @@ for SERVICE in $SERVICES; do
     -H "X-Requested-By: cli" \
     -X POST "$GRAYLOG_URL/api/views/search" \
     --data-raw "$SEARCH_PAYLOAD")
-  echo "Raw search creation response:"
-  echo "$SEARCH_RESPONSE"
+  
+  # Check if search creation was successful
+  if echo "$SEARCH_RESPONSE" | grep -q '"id"'; then
+    echo "✅ Search queries created successfully"
+  else
+    echo "❌ Search creation failed:"
+    echo "$SEARCH_RESPONSE"
+    exit 1
+  fi
 
   # Extract search and query IDs from response
   SEARCH_ID=$(echo "$SEARCH_RESPONSE" | jq -r '.id // empty')
@@ -401,15 +409,15 @@ for SERVICE in $SERVICES; do
     -H "X-Requested-By: cli" \
     -X POST "$GRAYLOG_URL/api/views" \
     --data-raw "$DASHBOARD_PAYLOAD")
-  echo "Raw dashboard creation response:"
-  echo "$CREATE_DASHBOARD_RESPONSE"
 
-  DASHBOARD_ID=$(echo "$CREATE_DASHBOARD_RESPONSE" | jq -r '.id // empty')
-  if [ -z "$DASHBOARD_ID" ]; then
-    echo "❌ Failed to create dashboard for $SERVICE."
+  if echo "$CREATE_DASHBOARD_RESPONSE" | grep -q '"id"'; then
+    DASHBOARD_ID=$(echo "$CREATE_DASHBOARD_RESPONSE" | jq -r '.id // empty')
+    echo "✅ Dashboard created successfully"
+  else
+    echo "❌ Dashboard creation failed:"
+    echo "$CREATE_DASHBOARD_RESPONSE"
     exit 1
   fi
-  echo "✅ Dashboard created with ID: $DASHBOARD_ID"
 
   #
   # 6. Add Widgets to Dashboard
@@ -636,72 +644,190 @@ for SERVICE in $SERVICES; do
   UPDATE_RESPONSE=$(curl -s -u "$AUTH" -X PUT "$GRAYLOG_URL/api/views/$DASHBOARD_ID" \
     -H "Content-Type: application/json" -H "X-Requested-By: cli" \
     --data-raw "$MERGED_VIEW")
-  echo "Merged update response:"
-  echo "$UPDATE_RESPONSE"
+  
+  # Check if dashboard update was successful
+  if echo "$UPDATE_RESPONSE" | grep -q '"id"'; then
+    echo "✅ Dashboard widgets configured successfully"
+  else
+    echo "❌ Dashboard update failed:"
+    echo "$UPDATE_RESPONSE"
+    exit 1
+  fi
+
+  #
+  # 7. Create Event Definition for Error Monitoring
+  # ===============================================
+  # Event definitions trigger alerts when specific conditions are met
+  # This creates an alert that fires when ERROR logs are detected for the service
+  #
+  echo "🚨 Creating error alert event definition for $SERVICE..."
+  EVENT_DEF_PAYLOAD=$(jq -n \
+    --arg service "$SERVICE" \
+  --arg stream_id "$STREAM_ID" \
+    '{
+      "title": "\($service) - ERROR Alert",
+      "description": "Alert triggered when ERROR logs are detected for \($service)",
+      "priority": 2,
+      "alert": true,
+      "config": {
+        "type": "aggregation-v1",
+    "query": "service:\($service) AND (level:ERROR OR level:3)",
+    "streams": ["\($stream_id)"],
+        "group_by": [],
+        "series": [
+          {
+            "id": "count()",
+            "type": "count"
+          }
+        ],
+        "conditions": {
+          "expression": {
+            "expr": ">",
+            "left": {
+              "expr": "number-ref",
+              "ref": "count()"
+            },
+            "right": {
+              "expr": "number",
+              "value": 0
+            }
+          }
+        },
+        "search_within_ms": 60000,
+        "execute_every_ms": 60000
+      },
+      "field_spec": {},
+      "key_spec": [],
+      "notification_settings": {
+        "grace_period_ms": 60000,
+        "backlog_size": 5
+      },
+      "notifications": []
+    }')
+
+  EVENT_DEF_RESPONSE=$(curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/events/definitions" \
+    -H "Content-Type: application/json" \
+    -H "X-Requested-By: cli" \
+    --data-raw "$EVENT_DEF_PAYLOAD")
+  if [ -z "$EVENT_DEF_RESPONSE" ]; then
+    echo "❌ Failed to create event definition for $SERVICE."
+    exit 1
+  fi
+
+
+  EVENT_ID=$(echo "$EVENT_DEF_RESPONSE" | jq -r '.id // empty')
+  if [ -z "$EVENT_ID" ]; then
+    echo "❌ Failed to create event definition for $SERVICE."
+    echo "Error details: $EVENT_DEF_RESPONSE"
+    exit 1
+  else
+    echo "✅ Created event definition for $SERVICE with ID: $EVENT_ID"
+  SERIES_TYPE_RETURNED=$(echo "$EVENT_DEF_RESPONSE" | jq -r '.config.series[0].type // empty') || true
+    if [ -z "$SERIES_TYPE_RETURNED" ] || [ "$SERIES_TYPE_RETURNED" = "null" ]; then
+      echo "🔧 Patching event definition to add missing series type..."
+      EVENT_DEF_CURRENT=$(curl -s -u "$AUTH" "$GRAYLOG_URL/api/events/definitions/$EVENT_ID")
+      if echo "$EVENT_DEF_CURRENT" | grep -q '"id"'; then
+  EVENT_DEF_PATCHED=$(echo "$EVENT_DEF_CURRENT" | jq '.config.series = [ { "id":"count()", "type":"count" } ]')
+        PATCH_RESP=$(curl -s -u "$AUTH" -X PUT "$GRAYLOG_URL/api/events/definitions/$EVENT_ID" \
+          -H "Content-Type: application/json" -H "X-Requested-By: cli" \
+          --data-raw "$EVENT_DEF_PATCHED")
+        if echo "$PATCH_RESP" | grep -q '"series"'; then
+          echo "✅ Series type patched"
+        else
+          echo "⚠️ Failed to patch series type: $PATCH_RESP"
+        fi
+      else
+        echo "⚠️ Could not retrieve event definition for series patch"
+      fi
+    fi
+
+    # Enable the event definition (set state = ENABLED)
+    EVENT_DEF_GET=$(curl -s -u "$AUTH" "$GRAYLOG_URL/api/events/definitions/$EVENT_ID")
+    if echo "$EVENT_DEF_GET" | grep -q '"id"'; then
+      EVENT_DEF_ENABLED=$(echo "$EVENT_DEF_GET" | jq '.state = "ENABLED"')
+      ENABLE_EVENT_RESPONSE=$(curl -s -u "$AUTH" -X PUT "$GRAYLOG_URL/api/events/definitions/$EVENT_ID" \
+        -H "Content-Type: application/json" -H "X-Requested-By: cli" \
+        --data-raw "$EVENT_DEF_ENABLED")
+      if echo "$ENABLE_EVENT_RESPONSE" | grep -qi 'RequestError'; then
+        echo "⚠️ Failed to enable event definition (may already be enabled): $ENABLE_EVENT_RESPONSE"
+      else
+        echo "✅ Event definition enabled"
+  echo "ℹ️ Event scoped to stream $STREAM_ID for $SERVICE"
+      fi
+    else
+      echo "⚠️ Could not retrieve event definition for enabling: $EVENT_DEF_GET"
+    fi
+
+    #
+    # 8. Create UI Notification
+    # =========================
+    # Notifications define how alerts are delivered to users
+    # This creates an in-app notification for the error alerts
+    #
+    echo "📢 Creating HTTP notification for $SERVICE (fires webhook)..."
+
+    # Webhook endpoint (override by setting GRAYLOG_WEBHOOK_URL env before running script)
+    WEBHOOK_URL=${GRAYLOG_WEBHOOK_URL:-"http://example.com/graylog-webhook"}
+    BODY_TEMPLATE='{"service":"${event_definition_title}","event_id":"${event.id}","message":"${event.message}"}'
+
+    NOTIF_PAYLOAD=$(jq -n \
+      --arg service "$SERVICE" \
+      --arg url "$WEBHOOK_URL" \
+      --arg body "$BODY_TEMPLATE" \
+      '{
+        title: ($service + " - HTTP Notification"),
+        description: ("Webhook notification for " + $service + " error alerts"),
+        config: {
+          type: "http-notification-v1",
+          url: $url,
+          api_key_as_header: false,
+          skip_tls_verification: true
+        }
+      }')
+
+    NOTIF_RESPONSE=$(curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/events/notifications" \
+      -H "Content-Type: application/json" \
+      -H "X-Requested-By: cli" \
+      --data-raw "$NOTIF_PAYLOAD")
+    if echo "$NOTIF_RESPONSE" | grep -q '"id"'; then
+      echo "✅ Notification created"
+    else
+      echo "❌ Notification creation failed: $NOTIF_RESPONSE"
+      exit 1
+    fi
+
+    NOTIF_ID=$(echo "$NOTIF_RESPONSE" | jq -r '.id // empty')
+    if [ -z "$NOTIF_ID" ]; then
+      echo "❌ Skipping linking due to notification creation failure."
+    else
+      echo "✅ Created notification for $SERVICE with ID: $NOTIF_ID"
+
+      #
+      # 9. Link Notification to Event Definition
+      # =========================================
+      # Connect the notification to the event definition so alerts are sent
+      # when the event conditions are triggered
+      #
+      echo "🔗 Attaching notification to event definition for $SERVICE (updating event definition)..."
+      CURRENT_EVENT_DEF=$(curl -s -u "$AUTH" "$GRAYLOG_URL/api/events/definitions/$EVENT_ID")
+      if echo "$CURRENT_EVENT_DEF" | grep -q '"id"'; then
+        UPDATED_EVENT_DEF=$(echo "$CURRENT_EVENT_DEF" | jq --arg nid "$NOTIF_ID" '.notifications = [ { "notification_id": $nid } ]')
+        UPDATE_NOTIF_RESPONSE=$(curl -s -u "$AUTH" -X PUT "$GRAYLOG_URL/api/events/definitions/$EVENT_ID" \
+          -H "Content-Type: application/json" -H "X-Requested-By: cli" \
+          --data-raw "$UPDATED_EVENT_DEF")
+        if echo "$UPDATE_NOTIF_RESPONSE" | grep -q '"notifications"'; then
+          echo "✅ Notification attached to event definition"
+        else
+          echo "⚠️ Failed to attach notification: $UPDATE_NOTIF_RESPONSE"
+        fi
+      else
+        echo "❌ Could not retrieve event definition for notification attachment: $CURRENT_EVENT_DEF"
+      fi
+    fi
+    
+  fi
 
   echo "🎉 $SERVICE setup complete!"
 done
 
 echo "🚀 All services successfully configured in Graylog."
-
-  # # 6. Create event definition
-  # EVENT_DEF_RESPONSE=$(curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/events/definitions" \
-  #   -H "Content-Type: application/json" \
-  #   -H "X-Requested-By: cli" \
-  #   -d "{
-  #     \"title\": \"$SERVICE - ERROR Alert\",
-  #     \"description\": \"Alert on ERROR logs for $SERVICE\",
-  #     \"priority\": 2,
-  #     \"alert\": true,
-  #     \"config\": {
-  #       \"type\": \"aggregation-v1\",
-  #       \"query\": \"service:$SERVICE AND level:ERROR\",
-  #       \"series\": [{\"id\": \"count()\", \"function\": \"count()\"}],
-  #       \"group_by\": [],
-  #       \"search_within_ms\": 60000,
-  #       \"execute_every_ms\": 60000
-  #     },
-  #     \"field_spec\": {},
-  #     \"key_spec\": [],
-  #     \"notification_settings\": {
-  #       \"grace_period_ms\": 60000,
-  #       \"backlog_size\": 5
-  #     },
-  #     \"notifications\": [],
-  #     \"storage\": {
-  #       \"type\": \"event-definition-default-storage-v1\"
-  #     }
-  #   }")
-  # EVENT_ID=$(echo "$EVENT_DEF_RESPONSE" | jq -r '.id // empty')
-  # if [ -z "$EVENT_ID" ]; then
-  #   echo "❌ Failed to create event definition for $SERVICE."
-  #   echo "$EVENT_DEF_RESPONSE"
-  #   continue
-  # fi
-
-  # # 7. Create UI notification
-  # NOTIF_RESPONSE=$(curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/events/notifications" \
-  #   -H "Content-Type: application/json" \
-  #   -H "X-Requested-By: cli" \
-  #   -d "{
-  #     \"title\": \"$SERVICE - UI Notification\",
-  #     \"description\": \"In-app notification for $SERVICE errors\",
-  #     \"config\": { \"type\": \"notification-v1\" }
-  #   }")
-  # NOTIF_ID=$(echo "$NOTIF_RESPONSE" | jq -r '.id // empty')
-  # if [ -z "$NOTIF_ID" ]; then
-  #   echo "❌ Failed to create UI notification for $SERVICE."
-  #   echo "$NOTIF_RESPONSE"
-  #   continue
-  # fi
-
-  # # 8. Link notification to event
-  # curl -s -u "$AUTH" -X PUT "$GRAYLOG_URL/api/events/definitions/$EVENT_ID/notifications" \
-  #   -H "Content-Type: application/json" \
-  #   -H "X-Requested-By: cli" \
-  #   -d "[ { \"notification_id\": \"$NOTIF_ID\" } ]"
-
-#   echo "🎉 $SERVICE setup complete!"
-# done
-
-# echo "🚀 All services successfully configured in Graylog."
