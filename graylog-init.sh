@@ -117,7 +117,48 @@ for SERVICE in $SERVICES; do
             "type": "stream",
             "id": $stream_id
           },
-          "search_types": []
+          "search_types": [
+            {
+              "id": "search-type-count",
+              "type": "pivot",
+              "query": {
+                "type": "elasticsearch",
+                "query_string": "service:\($service)"
+              },
+              "timerange": {
+                "type": "relative",
+                "range": 300
+              },
+              "series": [
+                {
+                  "id": "count()",
+                  "type": "count"
+                }
+              ],
+              "rollup": true,
+              "sort": []
+            },
+            {
+              "id": "search-type-error-count",
+              "type": "pivot",
+              "query": {
+                "type": "elasticsearch",
+                "query_string": "service:\($service) AND level:ERROR"
+              },
+              "timerange": {
+                "type": "relative",
+                "range": 300
+              },
+              "series": [
+                {
+                  "id": "count()",
+                  "type": "count"
+                }
+              ],
+              "rollup": true,
+              "sort": []
+            }
+          ]
         }
       ]
     }')
@@ -142,14 +183,14 @@ for SERVICE in $SERVICES; do
     --arg service "$SERVICE" \
     --arg search_id "$SEARCH_ID" \
     '{
-      type: "DASHBOARD",
-      title: "Dashboard for \($service)",
-      summary: "Auto-created dashboard for \($service)",
-      description: "Visualizations for \($service)",
-      search_id: $search_id,
-      state: {},
-      share_request: null,
-      favorite: false
+      "type": "DASHBOARD",
+      "title": "Dashboard for \($service)",
+      "summary": "Auto-created dashboard for \($service)",
+      "description": "Visualizations for \($service)",
+      "search_id": $search_id,
+      "state": {},
+      "share_request": null,
+      "favorite": false
     }')
   CREATE_DASHBOARD_RESPONSE=$(curl -s -u "$AUTH" \
     -H "Content-Type: application/json" \
@@ -166,7 +207,7 @@ for SERVICE in $SERVICES; do
   fi
   echo "✅ Dashboard created with ID: $DASHBOARD_ID"
 
-  # 6. Add widgets to the dashboard state (using correct QUERY_ID)
+  # 6. Add widgets to the dashboard state
   NEW_STATE=$(jq -n \
     --arg qid "$QUERY_ID" \
     --arg service "$SERVICE" \
@@ -174,42 +215,62 @@ for SERVICE in $SERVICES; do
       ($qid): {
         "selected_fields": [],
         "static_message_list_id": null,
-        "titles": {},
+        "titles": {
+          "widgets": {
+            "widget-1": "Total Logs (5min)",
+            "widget-2": "Error Logs (5min)"
+          }
+        },
         "widgets": [
           {
             "id": "widget-1",
-            "type": "SEARCH_RESULT_COUNT",
-            "filter": "",
+            "type": "aggregation",
+            "filter": null,
             "filters": [],
-            "timerange": {"type":"relative","range":300},
-            "query": {"type":"elasticsearch","query_string": ("service:" + $service)},
-            "streams": [],
-            "stream_categories": [],
-            "config": {}
+            "config": {
+              "visualization": "numeric",
+              "row_pivots": [],
+              "column_pivots": [],
+              "series": [
+                {
+                  "function": "count()"
+                }
+              ],
+              "sort": [],
+              "rollup": true
+            }
           },
           {
             "id": "widget-2",
-            "type": "SEARCH_RESULT_COUNT",
-            "filter": "",
+            "type": "aggregation",
+            "filter": null,
             "filters": [],
-            "timerange": {"type":"relative","range":300},
-            "query": {"type":"elasticsearch","query_string": ("service:" + $service + " AND level:ERROR")},
-            "streams": [],
-            "stream_categories": [],
-            "config": {}
+            "config": {
+              "visualization": "numeric",
+              "row_pivots": [],
+              "column_pivots": [],
+              "series": [
+                {
+                  "function": "count()"
+                }
+              ],
+              "sort": [],
+              "rollup": true
+            }
           }
         ],
-        "widget_mapping": {},
-        "positions": {
-          "widget-1":{"col":1,"row":1,"height":1,"width":1},
-          "widget-2":{"col":2,"row":1,"height":1,"width":1}
+        "widget_mapping": {
+          "widget-1": ["search-type-count"],
+          "widget-2": ["search-type-error-count"]
         },
-        "formatting": {"highlighting":[]},
-        "display_mode_settings":{"positions":{}}
+        "positions": {
+          "widget-1": {"col": 1, "row": 1, "height": 1, "width": 1},
+          "widget-2": {"col": 2, "row": 1, "height": 1, "width": 1}
+        },
+        "formatting": {"highlighting": []},
+        "display_mode_settings": {"positions": {}}
       }
     }')
-
-
 
   EXISTING_VIEW=$(curl -s -u "$AUTH" "$GRAYLOG_URL/api/views/$DASHBOARD_ID")
   MERGED_VIEW=$(echo "$EXISTING_VIEW" | jq --argjson frag "$NEW_STATE" '.state = (.state // {}) * $frag')
@@ -220,12 +281,10 @@ for SERVICE in $SERVICES; do
   echo "Merged update response:"
   echo "$UPDATE_RESPONSE"
 
-  echo "🎉 $SERVICE setup complete!"
-done
+    echo "🎉 $SERVICE setup complete!"
+  done
 
-echo "🚀 All services successfully configured in Graylog."
-
-# --- end drop-in ---
+  echo "🚀 All services successfully configured in Graylog."
 
   # # 6. Create event definition
   # EVENT_DEF_RESPONSE=$(curl -s -u "$AUTH" -X POST "$GRAYLOG_URL/api/events/definitions" \
