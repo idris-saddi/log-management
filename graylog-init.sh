@@ -154,7 +154,9 @@ for SERVICE in $SERVICES; do
   # 4. Create Search Query
   # =====================
   # Search queries enable analysis and monitoring of log data for specific services
-  # This creates both total count and error count searches for comprehensive monitoring
+  # This creates comprehensive monitoring with multiple search types:
+  # - Total log count, Error count, Warning count, Log levels distribution
+  # - Log timeline chart, Response time analysis, Top log sources
   #
   SEARCH_PAYLOAD=$(jq -n \
     --arg stream_id "$STREAM_ID" \
@@ -215,6 +217,142 @@ for SERVICE in $SERVICES; do
               ],
               "rollup": true,
               "sort": []
+            },
+            {
+              "id": "search-type-warning-count",
+              "type": "pivot",
+              "query": {
+                "type": "elasticsearch",
+                "query_string": "service:\($service) AND level:WARN"
+              },
+              "timerange": {
+                "type": "relative",
+                "range": 300
+              },
+              "series": [
+                {
+                  "id": "count()",
+                  "type": "count"
+                }
+              ],
+              "rollup": true,
+              "sort": []
+            },
+            {
+              "id": "search-type-level-distribution",
+              "type": "pivot",
+              "query": {
+                "type": "elasticsearch",
+                "query_string": "service:\($service)"
+              },
+              "timerange": {
+                "type": "relative",
+                "range": 300
+              },
+              "row_groups": [
+                {
+                  "field": "level",
+                  "type": "values",
+                  "limit": 10
+                }
+              ],
+              "series": [
+                {
+                  "id": "count()",
+                  "type": "count"
+                }
+              ],
+              "rollup": true,
+              "sort": []
+            },
+            {
+              "id": "search-type-timeline",
+              "type": "pivot",
+              "query": {
+                "type": "elasticsearch",
+                "query_string": "service:\($service)"
+              },
+              "timerange": {
+                "type": "relative",
+                "range": 300
+              },
+              "row_groups": [
+                {
+                  "field": "timestamp",
+                  "type": "time",
+                  "interval": {
+                    "type": "timeunit",
+                    "timeunit": "1m",
+                  }
+                }
+              ],
+              "series": [
+                {
+                  "id": "count()",
+                  "type": "count"
+                }
+              ],
+              "rollup": true,
+              "sort": []
+            },
+            {
+              "id": "search-type-response-times",
+              "type": "pivot",
+              "query": {
+                "type": "elasticsearch",
+                "query_string": "service:\($service) AND response_time:*"
+              },
+              "timerange": {
+                "type": "relative",
+                "range": 300
+              },
+              "series": [
+                {
+                  "id": "avg(response_time)",
+                  "type": "avg",
+                  "field": "response_time"
+                },
+                {
+                  "id": "max(response_time)",
+                  "type": "max",
+                  "field": "response_time"
+                }
+              ],
+              "rollup": true,
+              "sort": []
+            },
+            {
+              "id": "search-type-top-sources",
+              "type": "pivot",
+              "query": {
+                "type": "elasticsearch",
+                "query_string": "service:\($service)"
+              },
+              "timerange": {
+                "type": "relative",
+                "range": 300
+              },
+              "row_groups": [
+                {
+                  "field": "source",
+                  "type": "values",
+                  "limit": 5
+                }
+              ],
+              "series": [
+                {
+                  "id": "count()",
+                  "type": "count"
+                }
+              ],
+              "rollup": true,
+              "sort": [
+                {
+                  "type": "pivot",
+                  "field": "count()",
+                  "direction": "desc"
+                }
+              ]
             }
           ]
         }
@@ -276,9 +414,13 @@ for SERVICE in $SERVICES; do
   #
   # 6. Add Widgets to Dashboard
   # ===========================
-  # Configure dashboard widgets to display:
-  # - Total log count (5-minute timeframe)
-  # - Error log count (5-minute timeframe)
+  # Configure dashboard widgets with comprehensive monitoring visualization:
+  # - Total log count, Error count, Warning count (numeric widgets)
+  # - Log levels distribution (pie chart)
+  # - Log timeline (line chart)
+  # - Response time metrics (bar chart)
+  # - Top log sources (table)
+  # Using a larger 4x4 grid layout for better visibility
   #
   NEW_STATE=$(jq -n \
     --arg qid "$QUERY_ID" \
@@ -289,8 +431,13 @@ for SERVICE in $SERVICES; do
         "static_message_list_id": null,
         "titles": {
           "widgets": {
-            "widget-1": "Total Logs (5min)",
-            "widget-2": "Error Logs (5min)"
+            "widget-1": "📊 Total Logs (5min)",
+            "widget-2": "🚨 Error Logs (5min)",
+            "widget-3": "⚠️ Warning Logs (5min)",
+            "widget-4": "📈 Log Levels Distribution",
+            "widget-5": "⏱️ Log Timeline",
+            "widget-6": "🚀 Response Time Metrics",
+            "widget-7": "🔍 Top Log Sources"
           }
         },
         "widgets": [
@@ -329,15 +476,152 @@ for SERVICE in $SERVICES; do
               "sort": [],
               "rollup": true
             }
+          },
+          {
+            "id": "widget-3",
+            "type": "aggregation",
+            "filter": null,
+            "filters": [],
+            "config": {
+              "visualization": "numeric",
+              "row_pivots": [],
+              "column_pivots": [],
+              "series": [
+                {
+                  "function": "count()"
+                }
+              ],
+              "sort": [],
+              "rollup": true
+            }
+          },
+          {
+            "id": "widget-4",
+            "type": "aggregation",
+            "filter": null,
+            "filters": [],
+            "config": {
+              "visualization": "pie",
+              "row_pivots": [
+                {
+                  "field": "level",
+                  "type": "values",
+                  "config": {
+                    "limit": 10
+                  }
+                }
+              ],
+              "column_pivots": [],
+              "series": [
+                {
+                  "function": "count()"
+                }
+              ],
+              "sort": [],
+              "rollup": true
+            }
+          },
+          {
+            "id": "widget-5",
+            "type": "aggregation",
+            "filter": null,
+            "filters": [],
+            "config": {
+              "visualization": "line",
+              "row_pivots": [
+                {
+                  "field": "timestamp",
+                  "type": "time",
+                  "config": {
+                    "interval": {
+                      "type": "timeunit",
+                      "unit": "minutes",
+                      "value": 1
+                    }
+                  }
+                }
+              ],
+              "column_pivots": [],
+              "series": [
+                {
+                  "function": "count()"
+                }
+              ],
+              "sort": [],
+              "rollup": true
+            }
+          },
+          {
+            "id": "widget-6",
+            "type": "aggregation",
+            "filter": null,
+            "filters": [],
+            "config": {
+              "visualization": "bar",
+              "row_pivots": [],
+              "column_pivots": [],
+              "series": [
+                {
+                  "function": "avg(response_time)"
+                },
+                {
+                  "function": "max(response_time)"
+                }
+              ],
+              "sort": [],
+              "rollup": true
+            }
+          },
+          {
+            "id": "widget-7",
+            "type": "aggregation",
+            "filter": null,
+            "filters": [],
+            "config": {
+              "visualization": "table",
+              "row_pivots": [
+                {
+                  "field": "source",
+                  "type": "values",
+                  "config": {
+                    "limit": 5
+                  }
+                }
+              ],
+              "column_pivots": [],
+              "series": [
+                {
+                  "function": "count()"
+                }
+              ],
+              "sort": [
+                {
+                  "type": "pivot",
+                  "field": "count()",
+                  "direction": "Descending"
+                }
+              ],
+              "rollup": true
+            }
           }
         ],
         "widget_mapping": {
           "widget-1": ["search-type-count"],
-          "widget-2": ["search-type-error-count"]
+          "widget-2": ["search-type-error-count"],
+          "widget-3": ["search-type-warning-count"],
+          "widget-4": ["search-type-level-distribution"],
+          "widget-5": ["search-type-timeline"],
+          "widget-6": ["search-type-response-times"],
+          "widget-7": ["search-type-top-sources"]
         },
         "positions": {
-          "widget-1": {"col": 1, "row": 1, "height": 1, "width": 1},
-          "widget-2": {"col": 2, "row": 1, "height": 1, "width": 1}
+          "widget-1": {"col": 1, "row": 1, "height": 2, "width": 2},
+          "widget-2": {"col": 3, "row": 1, "height": 2, "width": 2},
+          "widget-3": {"col": 5, "row": 1, "height": 2, "width": 2},
+          "widget-4": {"col": 1, "row": 3, "height": 3, "width": 3},
+          "widget-5": {"col": 4, "row": 3, "height": 3, "width": 4},
+          "widget-6": {"col": 1, "row": 6, "height": 2, "width": 3},
+          "widget-7": {"col": 4, "row": 6, "height": 2, "width": 4}
         },
         "formatting": {"highlighting": []},
         "display_mode_settings": {"positions": {}}
