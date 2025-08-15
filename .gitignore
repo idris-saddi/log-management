@@ -1,6 +1,6 @@
 # IDE/editor settings
 .vscode/          # VS Code workspace settings
-.idea/            # IntelliJ IDEA settings
+.idea/           # IntelliJ IDEA settings
 *.iml            # IntelliJ module files
 
 # Java build output (Maven/Gradle)
