@@ -1,0 +1,21 @@
+# IDE/editor settings
+.vscode/          # VS Code workspace settings
+.idea/            # IntelliJ IDEA settings
+*.iml            # IntelliJ module files
+
+# Java build output (Maven/Gradle)
+**/target/       # Maven build output directories
+**/build/        # Gradle build output directories
+*.class         # Compiled Java classes
+
+# Runtime and logs
+*.log           # Log files generated at runtime
+*.tmp           # Temporary files
+
+# Environment and container
+.env            # Environment variable files
+docker-compose.override.yml  # Local Docker overrides
+
+# OS/system files
+.DS_Store       # macOS file metadata
+Thumbs.db       # Windows image cache
