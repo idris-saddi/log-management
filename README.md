@@ -46,8 +46,6 @@ The system reduces operational overhead by automating the complete logging infra
 * **Configurable log levels** via request parameters
 * **Real-time log visualization** in Graylog web interface
 
-Here are two schemas you can include in your README to better illustrate the project setup:
-
 ---
 
 ## 🏗️ System Architecture
@@ -333,12 +331,12 @@ networks:
 ```
 log-management/
 ├── docker-compose.yml              # Complete environment orchestration
-├── graylog-init.Dockerfile        # Custom init container
+├── graylog-init.Dockerfile         # Custom init container
 ├── graylog-init.sh                 # Automated Graylog configuration script
 ├── config/
-│   ├── graylog.conf               # Graylog server configuration
-│   └── nxlog.conf                 # NXLog configuration (if needed)
-├── log-service/                   # Kafka consumer + GELF forwarder
+│   ├── graylog.conf                # Graylog server configuration
+│   └── nxlog.conf                  # NXLog configuration (if needed)
+├── log-service/                    # Kafka consumer + GELF forwarder
 │   ├── src/main/java/com/idris/log_service/
 │   │   ├── LogServiceApplication.java
 │   │   ├── kafka/LogConsumer.java
