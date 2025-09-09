@@ -1,0 +1,76 @@
+version: '3.8'
+
+# Integration testing environment
+# This compose file sets up a testing environment with testcontainers
+
+networks:
+  test-network:
+    driver: bridge
+  graynet:
+    external: true
+    name: log-management_graynet
+
+services:
+  # Test databases with smaller resource allocation
+  test-mongodb:
+    image: mongo:6.0.5-jammy
+    container_name: test-mongodb
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: test
+      MONGO_INITDB_ROOT_PASSWORD: test
+    networks:
+      - test-network
+
+  test-kafka:
+    image: confluentinc/cp-kafka:7.4.3
+    container_name: test-kafka
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: test-zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - test-zookeeper
+    networks:
+      - test-network
+
+  test-zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.3
+    container_name: test-zookeeper
+    ports:
+      - "2182:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - test-network
+
+  # Test data generation service
+  log-generator:
+    build:
+      context: ./test/log-generator
+      dockerfile: Dockerfile
+    container_name: log-generator
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=test-kafka:9093
+      - LOG_RATE=10  # logs per second
+      - SERVICE_NAMES=service1,service2,service3
+    depends_on:
+      - test-kafka
+    networks:
+      - test-network
+
+  # Performance testing tools
+  k6:
+    image: grafana/k6:latest
+    container_name: k6-tests
+    volumes:
+      - ./test/k6:/scripts
+    command: run /scripts/load-test.js
+    networks:
+      - graynet

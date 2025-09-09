@@ -1,0 +1,59 @@
+# Development Environment Configuration
+version: '3.8'
+
+# Override for development with:
+# docker compose -f docker-compose.yml -f environments/docker-compose.dev.yml up
+
+services:
+  graylog:
+    environment:
+      GRAYLOG_HTTP_EXTERNAL_URI: "http://localhost:9000/"
+      GRAYLOG_ROOT_TIMEZONE: "UTC"
+      GRAYLOG_WEB_ENDPOINT_URI: "http://localhost:9000/api"
+    volumes:
+      - ./config/graylog.dev.conf:/usr/share/graylog/config/graylog.conf
+
+  log-service:
+    build:
+      context: ./log-service
+      target: builder
+    volumes:
+      - ./log-service/src:/app/src
+    environment:
+      SPRING_PROFILES_ACTIVE: development
+      SPRING_DEVTOOLS_RESTART_ENABLED: true
+    ports:
+      - "5005:5005"  # Debug port
+    command: >
+      java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      -jar app.jar
+
+  service1:
+    build:
+      context: ./service1
+      target: builder
+    volumes:
+      - ./service1/src:/app/src
+    environment:
+      SPRING_PROFILES_ACTIVE: development
+      LOGGING_LEVEL_ROOT: DEBUG
+
+  service2:
+    build:
+      context: ./service2
+      target: builder
+    volumes:
+      - ./service2/src:/app/src
+    environment:
+      SPRING_PROFILES_ACTIVE: development
+      LOGGING_LEVEL_ROOT: DEBUG
+
+  # Development tools
+  maildev:
+    image: maildev/maildev
+    container_name: maildev
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    networks:
+      - graynet
