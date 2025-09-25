@@ -19,7 +19,8 @@
 \usepackage{float}
 \usepackage{amsmath}
 \usepackage{xcolor}
-\usepackage{listings}
+\usepackage{fancyvrb}
+\usepackage{verbatim}
 
 % Geometry and spacing
 \geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
@@ -28,37 +29,28 @@
 % Hyperref setup
 \hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
 
-% Listings configuration
-\lstdefinestyle{base}{
-  basicstyle=\ttfamily\small,
-  numbers=left,
-  numbersep=6pt,
-  numberstyle=\tiny, 
-  keywordstyle=\color{blue!60!black},
-  commentstyle=\color{green!40!black},
-  stringstyle=\color{orange!60!black},
-  breaklines=true,
-  breakatwhitespace=false,
-  tabsize=2,
-  showstringspaces=false,
-  frame=single,
-  framerule=0.3pt
-}
-\lstset{style=base}
-\lstdefinelanguage{YAML}{
-  keywords={true,false,null,y,n},
-  sensitive=false,
-  morecomment=[l]{#},
-  morestring=[b]",
-  morestring=[b]'
-}
-% JSON listings
-\lstdefinelanguage{JSON}{
-  morestring=[b]",
-  morecomment=[l]{//},
-  literate={:}{{{:}}}1{,}{{{,}}}1{[}{{{[}}}1{]}{{{]}}}1
-           {\{}{{\{}}}1{\}}{{\}}}1
-}
+% Unicode support for verbatim
+\usepackage[utf8]{inputenc}
+\usepackage{newunicodechar}
+\newunicodechar{✅}{[OK]}
+\newunicodechar{❌}{[ERROR]}
+\newunicodechar{🕒}{[CLOCK]}
+\newunicodechar{🔌}{[PLUG]}
+\newunicodechar{📦}{[PACKAGE]}
+\newunicodechar{🔁}{[REPEAT]}
+\newunicodechar{📊}{[CHART]}
+\newunicodechar{🚨}{[ALARM]}
+\newunicodechar{⚠}{[WARNING]}
+\newunicodechar{️}{}
+\newunicodechar{📈}{[TREND]}
+\newunicodechar{⏱}{[TIMER]}
+\newunicodechar{🚀}{[ROCKET]}
+\newunicodechar{🔍}{[SEARCH]}
+\newunicodechar{🔧}{[TOOL]}
+\newunicodechar{ℹ}{[INFO]}
+\newunicodechar{📢}{[ANNOUNCE]}
+\newunicodechar{🔗}{[LINK]}
+\newunicodechar{🎉}{[PARTY]}
 
 % Title page
 \begin{document}
@@ -90,10 +82,9 @@
 I would like to express my sincere gratitude to my company supervisor, the engineering team, and all colleagues for their support during this internship. Their guidance and trust were instrumental to the success of this project. I also thank my professors at INSAT for their academic support and the knowledge they provided.
 
 \pagenumbering{roman}
-	ableofcontents
+\tableofcontents
 \listoffigures
 \listoftables
-\lstlistoflistings
 \clearpage
 \pagenumbering{arabic}
 
@@ -194,8 +185,8 @@ After evaluating the fit for \textit{our objectives} (rapid automation, streams/
 
 \subsection*{Comparison Matrix}
 \begin{longtable}{p{3.2cm} p{3.8cm} p{3.8cm} p{3.8cm}}
-	oprule
-	extbf{Feature} & \textbf{ELK / OpenSearch Stack} & \textbf{Graylog} & \textbf{Loki} \\
+\toprule
+\textbf{Feature} & \textbf{ELK / OpenSearch Stack} & \textbf{Graylog} & \textbf{Loki} \\
 \midrule
 \endhead
 Ingestion & Logstash/Beats; flexible pipelines & Built-in inputs (e.g., GELF TCP) & Promtail agents; label-based \\
@@ -216,8 +207,8 @@ Requirements were gathered from SRE and development stakeholders focusing on ope
 \begin{table}[H]
 \centering
 \begin{tabular}{p{3cm} p{11cm}}
-	oprule
-	extbf{Priority} & \textbf{Requirement} \\
+\toprule
+\textbf{Priority} & \textbf{Requirement} \\
 \midrule
 Must Have & Centralized log search; ERROR alerting; automated provisioning; containerized deployment \\
 Should Have & Level distribution dashboard; MDC enrichment; response time metrics \\
@@ -316,15 +307,21 @@ Key properties from \texttt{application.properties} files:
 
 \section{Log Event Schema and Enrichment}
 \subsection{Producer-side JSON}
-Services publish JSON events containing at least \texttt{timestamp}, \texttt{message}, \texttt{level}, and \texttt{service} (see Listing~\ref{lst:service-json}).
-\begin{lstlisting}[language=JSON,caption={Minimal producer event structure (service1/service2)},label={lst:service-json}]
+Services publish JSON events containing at least \texttt{timestamp}, \texttt{message}, \texttt{level}, and \texttt{service} (see Figure~\ref{fig:service-json}).
+
+\begin{figure}[H]
+\centering
+\begin{Verbatim}[frame=single, fontsize=\small, xleftmargin=1cm, xrightmargin=1cm]
 {
   "timestamp": "2025-07-15T10:45:12.345Z",
   "message": "UserAuthenticated",
   "level": "INFO",
   "service": "service1"
 }
-\end{lstlisting}
+\end{Verbatim}
+\caption{Minimal producer event structure (service1/service2)}
+\label{fig:service-json}
+\end{figure}
 
 \subsection{Consumer DTO Mapping}
 The Kafka consumer maps messages to \texttt{LogMessage} with optional fields ignored (\texttt{@JsonIgnoreProperties(ignoreUnknown=true)}). Supported fields:
@@ -340,8 +337,8 @@ During processing, the consumer sets MDC keys: \texttt{service}, \texttt{origina
 \begin{table}[H]
 \centering
 \begin{tabular}{p{4cm} p{4cm} p{7cm}}
-	oprule
-	extbf{Component} & \textbf{Key Setting} & \textbf{Value / Purpose} \\
+\toprule
+\textbf{Component} & \textbf{Key Setting} & \textbf{Value / Purpose} \\
 \midrule
 service1/service2 & Kafka bootstrap & \texttt{kafka:9092} (container DNS) \\
 service1/service2 & Kafka serializers & String/JSON via logback encoder \\
@@ -359,8 +356,8 @@ All components are orchestrated with Docker Compose on a single bridge network e
 \begin{table}[H]
 \centering
 \begin{tabular}{llp{7cm}}
-	oprule
-	extbf{Service} & \textbf{Port} & \textbf{Purpose} \\
+\toprule
+\textbf{Service} & \textbf{Port} & \textbf{Purpose} \\
 \midrule
 Graylog UI & 9000 & Web interface for log management \\
 OpenSearch & 9200 & Index and search backend \\
@@ -379,42 +376,67 @@ GELF TCP & 12201 & Graylog input for log ingestion \\
 \section{Service Endpoints and Log Publishing}
 The services provide a REST endpoint that accepts a message and level, normalizes the level, serializes to JSON, and publishes to Kafka.
 
-\begin{lstlisting}[language=Java,caption={Excerpt: service1 LogController (publishing to Kafka)},label={lst:logcontroller}]
+\begin{figure}[H]
+\centering
+\begin{Verbatim}[frame=single, fontsize=\small, xleftmargin=1cm, xrightmargin=1cm]
 // See Appendix C for the full source
-\end{lstlisting}
+\end{Verbatim}
+\caption{Excerpt: service1 LogController (publishing to Kafka)}
+\label{fig:logcontroller}
+\end{figure}
 
 \section{Kafka Consumer and GELF Forwarder}
 The log-service consumes the \texttt{logs} topic and forwards to Graylog using a GELF TCP appender configured in Logback.
 
-\begin{lstlisting}[language=Java,caption={Excerpt: log-service Kafka consumer},label={lst:logconsumer}]
+\begin{figure}[H]
+\centering
+\begin{Verbatim}[frame=single, fontsize=\small, xleftmargin=1cm, xrightmargin=1cm]
 // See Appendix D for the full source
-\end{lstlisting}
+\end{Verbatim}
+\caption{Excerpt: log-service Kafka consumer}
+\label{fig:logconsumer}
+\end{figure}
 
 \section{Graylog Automation}
 The \texttt{graylog-init.sh} script waits for the Graylog API, creates the global GELF TCP input, configures streams per service with routing rules, generates searches and dashboards with multiple widgets, and adds an ERROR-level alert with an HTTP notification.
 
-\begin{lstlisting}[language=bash,caption={Automation script responsibilities},label={lst:initoverview}]
+\begin{figure}[H]
+\centering
+\begin{Verbatim}[frame=single, fontsize=\small, xleftmargin=1cm, xrightmargin=1cm]
 1) Wait for Graylog API readiness
 2) Create global GELF TCP input on port 12201
 3) For each service: create stream, rules, search, dashboard
 4) Add widgets (counts, level distribution, timeline, sources)
 5) Create ERROR alert and attach HTTP notification
-\end{lstlisting}
+\end{Verbatim}
+\caption{Automation script responsibilities}
+\label{fig:initoverview}
+\end{figure}
 
 \chapter{Configuration and Deployment}
 \section{Docker Compose}
 The environment is fully orchestrated via Docker Compose with persistent volumes and a dedicated network for internal communication.
 
-\begin{lstlisting}[language=YAML,caption={docker-compose.yml overview},label={lst:compose}]
+\begin{figure}[H]
+\centering
+\begin{Verbatim}[frame=single, fontsize=\small, xleftmargin=1cm, xrightmargin=1cm]
 # See Appendix A for the full file
-\end{lstlisting}
+\end{Verbatim}
+\caption{docker-compose.yml overview}
+\label{fig:compose}
+\end{figure}
 
 \section{Logging Configuration}
 GELF TCP is configured in Logback to enrich messages with MDC and send them to Graylog.
 
-\begin{lstlisting}[language=XML,caption={Logback GELF appender (log-service)},label={lst:logback}]
+\begin{figure}[H]
+\centering
+\begin{Verbatim}[frame=single, fontsize=\small, xleftmargin=1cm, xrightmargin=1cm]
 <!-- See Appendix E for the full file -->
-\end{lstlisting}
+\end{Verbatim}
+\caption{Logback GELF appender (log-service)}
+\label{fig:logback}
+\end{figure}
 
 \section{Running Locally}
 Prerequisites: Docker, Docker Compose, Java 21, Maven, \texttt{jq}, and \texttt{curl}.
@@ -476,8 +498,8 @@ Example SLOs: \textit{p95 ingestion latency < 2s}, \textit{delivery success rate
 \begin{table}[H]
 \centering
 \begin{tabular}{p{3.5cm} p{6.5cm} p{4.5cm}}
-	oprule
-	extbf{Risk} & \textbf{Impact} & \textbf{Mitigation} \\
+\toprule
+\textbf{Risk} & \textbf{Impact} & \textbf{Mitigation} \\
 \midrule
 Kafka outage & Log delivery delayed & Buffering, retries, multi-broker cluster \\
 OpenSearch overload & Slow queries / dropped indexing & Sharding, resource scaling, index lifecycle \\
@@ -507,8 +529,8 @@ Use environment variables and separate configuration files for dev/stage/prod. C
 \begin{table}[H]
 \centering
 \begin{tabular}{llp{7cm}}
-	oprule
-	extbf{Component} & \textbf{Version} & \textbf{Notes} \\
+\toprule
+\textbf{Component} & \textbf{Version} & \textbf{Notes} \\
 \midrule
 Spring Boot & 3.5.3 & Backend framework for services \\
 Java & 21 & LTS runtime \\
@@ -568,8 +590,8 @@ Stand-ups and async updates (issue comments, pull request notes) maintained tran
 \begin{table}[H]
 \centering
 \begin{tabular}{p{5cm} p{4cm} p{6cm}}
-	oprule
-	extbf{Item} & \textbf{Cost (indicative)} & \textbf{Notes} \\
+\toprule
+\textbf{Item} & \textbf{Cost (indicative)} & \textbf{Notes} \\
 \midrule
 Compute (containers) & Internal & Developer workstation resources for local runs \\
 Storage (OpenSearch) & Internal & Depends on retention and volume; see capacity planning \\
@@ -609,34 +631,34 @@ Planned improvements: secure-by-default TLS across services, CI/CD integration f
 
 \appendix
 \chapter{Appendix A: docker-compose.yml}
-\lstinputlisting[language=YAML]{docker-compose.yml}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../docker-compose.yml}
 
 \chapter{Appendix B: graylog-init.sh}
-\lstinputlisting[language=bash]{graylog-init.sh}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../graylog-init.sh}
 
 \chapter{Appendix C: service1 LogController.java}
-\lstinputlisting[language=Java]{service1/src/main/java/com/idris/service1/LogController.java}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../service1/src/main/java/com/idris/service1/LogController.java}
 
 \chapter{Appendix D: log-service LogConsumer.java}
-\lstinputlisting[language=Java]{log-service/src/main/java/com/idris/log_service/kafka/LogConsumer.java}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../log-service/src/main/java/com/idris/log_service/kafka/LogConsumer.java}
 
 \chapter{Appendix E: logback-spring.xml (log-service)}
-\lstinputlisting[language=XML]{log-service/src/main/resources/logback-spring.xml}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../log-service/src/main/resources/logback-spring.xml}
 
 \chapter{Appendix F: service1 application.properties}
-\lstinputlisting[language={}]{service1/src/main/resources/application.properties}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../service1/src/main/resources/application.properties}
 
 \chapter{Appendix G: service2 application.properties}
-\lstinputlisting[language={}]{service2/src/main/resources/application.properties}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../service2/src/main/resources/application.properties}
 
 \chapter{Appendix H: service2 logback-spring.xml}
-\lstinputlisting[language=XML]{service2/src/main/resources/logback-spring.xml}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../service2/src/main/resources/logback-spring.xml}
 
 \chapter{Appendix I: log-service application.properties}
-\lstinputlisting[language={}]{log-service/src/main/resources/application.properties}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../log-service/src/main/resources/application.properties}
 
 \chapter{Appendix J: service1 logback-spring.xml}
-\lstinputlisting[language=XML]{service1/src/main/resources/logback-spring.xml}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../service1/src/main/resources/logback-spring.xml}
 
 \chapter*{References}
 \addcontentsline{toc}{chapter}{References}
