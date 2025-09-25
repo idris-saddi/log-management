@@ -20,6 +20,7 @@
 \usepackage{fancyvrb}
 \usepackage{verbatim}
 \usepackage{pdflscape}
+\usepackage{pdfpages}
 
 % Geometry and spacing
 \geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
@@ -53,28 +54,7 @@
 
 % Title page
 \begin{document}
-\begin{titlepage}
-    \centering
-    {\Large National Institute of Applied Sciences and Technology (INSAT)\\[0.25cm]}
-    {\large Computer Science Department\\[1.2cm]}
-    {\LARGE \textbf{Internship Report}}\\[0.6cm]
-    {\Large \textbf{Centralized Log Management System for Microservices}}\\[1.2cm]
-
-  \begin{tabular}{>{\bfseries}p{5cm} p{9cm}}
-    Student: & Idris SADDI \\
-    Company: & MedSirat \\
-    Internship period: & 01/07/2025 -- 31/08/2025 \\
-    Supervisor: & Salma SEDDIK \\
-    Academic advisor: & INSAT \\
-  \end{tabular}
-
-    \vfill
-    % Optional logo
-    % \includegraphics[width=0.35\textwidth]{logo-insat}
-
-    \vfill
-    \large \textit{Submission date: September 23, 2025}
-\end{titlepage}
+\includepdf[pages=-]{PageDeGarde.docx.pdf}
 
 % Acknowledgements
 \chapter*{Acknowledgements}

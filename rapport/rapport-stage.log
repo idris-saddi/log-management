@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2025.5.16)  25 SEP 2025 16:44
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2025.5.16)  26 SEP 2025 00:27
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -621,39 +621,74 @@ Package: pdflscape-nometadata 2022-10-28 v0.13 Display of landscape pages in PDF
 Package: lscape 2020/05/28 v3.02 Landscape Pages (DPC)
 )
 Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
-))
-Package hyperref Info: Option `colorlinks' set `true' on input line 29.
+)) (C:\Users\Idris Saddi\AppData\Local\Programs\MiKTeX\tex/latex/pdfpages\pdfpages.sty
+Package: pdfpages 2025/03/12 v0.6f Insert pages of external PDF documents (AM)
+ (C:\Users\Idris Saddi\AppData\Local\Programs\MiKTeX\tex/latex/base\ifthen.sty
+Package: ifthen 2022/04/13 v1.1d Standard LaTeX ifthen package (DPC)
+) (C:\Users\Idris Saddi\AppData\Local\Programs\MiKTeX\tex/latex/tools\calc.sty
+Package: calc 2023/07/08 v4.3 Infix arithmetic (KKT,FJ)
+\calc@Acount=\count356
+\calc@Bcount=\count357
+\calc@Adimen=\dimen302
+\calc@Bdimen=\dimen303
+\calc@Askip=\skip63
+\calc@Bskip=\skip64
+LaTeX Info: Redefining \setlength on input line 80.
+LaTeX Info: Redefining \addtolength on input line 81.
+\calc@Ccount=\count358
+\calc@Cskip=\skip65
+) (C:\Users\Idris Saddi\AppData\Local\Programs\MiKTeX\tex/latex/eso-pic\eso-pic.sty
+Package: eso-pic 2023/05/03 v3.0c eso-pic (RN)
+\ESO@tempdima=\dimen304
+\ESO@tempdimb=\dimen305
+)
+\AM@pagewidth=\dimen306
+\AM@pageheight=\dimen307
+\AM@fboxrule=\dimen308
+ (C:\Users\Idris Saddi\AppData\Local\Programs\MiKTeX\tex/latex/pdfpages\pppdftex.def
+File: pppdftex.def 2025/03/12 v0.6f Pdfpages driver for pdfTeX (AM)
+)
+\pdfpages@includegraphics@status=\count359
+\AM@pagebox=\box78
+\AM@global@opts=\toks44
+\AM@pagecnt=\count360
+\AM@toc@title=\toks45
+\AM@lof@heading=\toks46
+\c@AM@survey=\count361
+\AM@templatesizebox=\box79
+)
+Package hyperref Info: Option `colorlinks' set `true' on input line 30.
  (C:\Users\Idris Saddi\AppData\Local\Programs\MiKTeX\tex/latex/base\inputenc.sty
 Package: inputenc 2021/02/14 v1.3d Input encoding file
-\inpenc@prehook=\toks44
-\inpenc@posthook=\toks45
+\inpenc@prehook=\toks47
+\inpenc@posthook=\toks48
 ) (C:\Users\Idris Saddi\AppData\Local\Programs\MiKTeX\tex/latex/newunicodechar\newunicodechar.sty
 Package: newunicodechar 2018/04/08 v1.2 Defining Unicode characters
 ) (C:\Users\Idris Saddi\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdftex.def
 File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count356
-\l__pdf_internal_box=\box78
+\l__color_backend_stack_int=\count362
+\l__pdf_internal_box=\box80
 ) (rapport-stage.aux)
 \openout1 = `rapport-stage.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -689,24 +724,24 @@ LaTeX Font Info:    ... okay on input line 55.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring ON on input line 55.
+Package hyperref Info: Link coloring ON on input line 56.
 (rapport-stage.out) (rapport-stage.out)
 \@outlinefile=\write5
 \openout5 = `rapport-stage.out'.
 
  (C:\Users\Idris Saddi\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count357
-\scratchdimen=\dimen302
-\scratchbox=\box79
-\nofMPsegments=\count358
-\nofMParguments=\count359
-\everyMPshowfont=\toks46
-\MPscratchCnt=\count360
-\MPscratchDim=\dimen303
-\MPnumerator=\count361
-\makeMPintoPDFobject=\count362
-\everyMPtoPDFconversion=\toks47
+\scratchcounter=\count363
+\scratchdimen=\dimen309
+\scratchbox=\box81
+\nofMPsegments=\count364
+\nofMParguments=\count365
+\everyMPshowfont=\toks49
+\MPscratchCnt=\count366
+\MPscratchDim=\dimen310
+\MPnumerator=\count367
+\makeMPintoPDFobject=\count368
+\everyMPtoPDFconversion=\toks50
 ) (C:\Users\Idris Saddi\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
@@ -716,12 +751,55 @@ File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
 Package caption Info: End \AtBeginDocument code.
+<PageDeGarde.docx.pdf, id=206, 598.235pt x 845.1575pt>
+File: PageDeGarde.docx.pdf Graphic file (type pdf)
+<use PageDeGarde.docx.pdf>
+Package pdftex.def Info: PageDeGarde.docx.pdf  used on input line 57.
+(pdftex.def)             Requested size: 598.23354pt x 845.15544pt.
+<PageDeGarde.docx.pdf, id=208, page=1, 598.235pt x 845.1575pt>
+File: PageDeGarde.docx.pdf Graphic file (type pdf)
+<use PageDeGarde.docx.pdf, page 1>
+Package pdftex.def Info: PageDeGarde.docx.pdf , page1 used on input line 57.
+(pdftex.def)             Requested size: 598.23354pt x 845.15544pt.
+File: PageDeGarde.docx.pdf Graphic file (type pdf)
+<use PageDeGarde.docx.pdf, page 1>
+Package pdftex.def Info: PageDeGarde.docx.pdf , page1 used on input line 57.
+(pdftex.def)             Requested size: 597.7406pt x 844.45905pt.
+File: PageDeGarde.docx.pdf Graphic file (type pdf)
+<use PageDeGarde.docx.pdf, page 1>
+Package pdftex.def Info: PageDeGarde.docx.pdf , page1 used on input line 57.
+(pdftex.def)             Requested size: 597.7406pt x 844.45905pt.
+File: PageDeGarde.docx.pdf Graphic file (type pdf)
+<use PageDeGarde.docx.pdf, page 1>
+Package pdftex.def Info: PageDeGarde.docx.pdf , page1 used on input line 57.
+(pdftex.def)             Requested size: 597.7406pt x 844.45905pt.
+File: PageDeGarde.docx.pdf Graphic file (type pdf)
+<use PageDeGarde.docx.pdf, page 1>
+Package pdftex.def Info: PageDeGarde.docx.pdf , page1 used on input line 57.
+(pdftex.def)             Requested size: 597.7406pt x 844.45905pt.
  [1
 
-{C:/Users/Idris Saddi/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}] [1
 
-]
-LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 98.
+ <./PageDeGarde.docx.pdf>]
+<PageDeGarde.docx.pdf, id=238, page=2, 598.235pt x 845.1575pt>
+File: PageDeGarde.docx.pdf Graphic file (type pdf)
+<use PageDeGarde.docx.pdf, page 2>
+Package pdftex.def Info: PageDeGarde.docx.pdf , page2 used on input line 57.
+(pdftex.def)             Requested size: 597.7406pt x 844.45905pt.
+File: PageDeGarde.docx.pdf Graphic file (type pdf)
+<use PageDeGarde.docx.pdf, page 2>
+Package pdftex.def Info: PageDeGarde.docx.pdf , page2 used on input line 57.
+(pdftex.def)             Requested size: 597.7406pt x 844.45905pt.
+File: PageDeGarde.docx.pdf Graphic file (type pdf)
+<use PageDeGarde.docx.pdf, page 2>
+Package pdftex.def Info: PageDeGarde.docx.pdf , page2 used on input line 57.
+(pdftex.def)             Requested size: 597.7406pt x 844.45905pt.
+ [2
+
+ <./PageDeGarde.docx.pdf>] [1
+
+{C:/Users/Idris Saddi/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 78.
  (C:\Users\Idris Saddi\AppData\Local\Programs\MiKTeX\tex/latex/base\t1cmtt.fd
 File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 ) [2
@@ -744,14 +822,19 @@ File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.132 \chapter
+l.112 \chapter
               {Company Context and Objectives} [1
 
 
 
 ]
 Chapter 1.
-[2
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.126     \item D
+                 esign a \textbf{centralized log ingestion architecture}. [2
 
 ] [3] [4
 
@@ -773,7 +856,7 @@ Chapter 4.
 ] [8] [9] [10]
 Chapter 5.
 
-Overfull \hbox (3.4856pt too wide) in paragraph at lines 323--324
+Overfull \hbox (3.4856pt too wide) in paragraph at lines 303--304
 []\T1/cmr/bx/n/12 Automated pro-vi-sion-ing\T1/cmr/m/n/12 : \T1/cmtt/m/n/12 graylog-init.sh \T1/cmr/m/n/12 script cre-ates in-puts, streams, dash-
  []
 
@@ -782,7 +865,7 @@ Overfull \hbox (3.4856pt too wide) in paragraph at lines 323--324
 ] [12]
 Chapter 6.
 
-Overfull \hbox (0.16557pt too wide) in paragraph at lines 360--361
+Overfull \hbox (0.16557pt too wide) in paragraph at lines 340--341
 []\T1/cmr/bx/n/12 Deployment au-toma-tion\T1/cmr/m/n/12 : Re-pro-ducible en-vi-ron-ments across de-vel-op-ment stages 
  []
 
@@ -797,7 +880,7 @@ Chapter 7.
 ] [17
 
 ]
-Underfull \hbox (badness 2057) in paragraph at lines 444--445
+Underfull \hbox (badness 2057) in paragraph at lines 424--425
 []\T1/cmr/m/n/12 Spring Boot Ref-er-ence, [][]$\T1/cmtt/m/n/12 https : / / docs . spring . io / spring-[]boot / docs / current /
  []
 
@@ -808,7 +891,7 @@ Appendix A.
 [19
 
 ]
-Overfull \hbox (15.44131pt too wide) in paragraph at lines 525--527
+Overfull \hbox (15.44131pt too wide) in paragraph at lines 505--507
 [][]$\T1/cmtt/m/n/12 https : / / github . com / idris-[]saddi / log-[]management / blob / master / docker-[]compose . yml$[][] 
  []
 
@@ -821,7 +904,7 @@ Appendix C.
 [23
 
 ]
-Overfull \hbox (14.94131pt too wide) in paragraph at lines 651--653
+Overfull \hbox (14.94131pt too wide) in paragraph at lines 631--633
 [][]$\T1/cmtt/m/n/12 https : / / github . com / idris-[]saddi / log-[]management / blob / master / service1 / src / main /
  []
 
@@ -862,17 +945,17 @@ Package rerunfilecheck Info: File `rapport-stage.out' has not changed.
 (rerunfilecheck)             Checksum: 04DEC007BE194FA98B31C83AB07C8B38;8737.
  ) 
 Here is how much of TeX's memory you used:
- 26768 strings out of 474486
- 519386 string characters out of 5740887
+ 27570 strings out of 474486
+ 533147 string characters out of 5740887
  1945542 words of memory out of 5000000
- 48475 multiletter control sequences out of 15000+600000
- 574527 words of font info for 68 fonts, out of 8000000 for 9000
+ 49263 multiletter control sequences out of 15000+600000
+ 572290 words of font info for 65 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 99i,9n,107p,1322b,972s stack positions out of 10000i,1000n,20000p,200000b,200000s
- <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt0800.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1440.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1095.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcti1200.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1095.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1200.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecti1200.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx2488.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecti1440.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1200.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1200.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1728.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx2074.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1440.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1728.pk>
-Output written on rapport-stage.pdf (40 pages, 334683 bytes).
+ 99i,17n,107p,1322b,976s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt0800.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1440.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1095.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcti1200.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1095.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1728.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1200.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecti1200.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx1200.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1200.pk> <C:\Users\Idris Saddi\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx2488.pk>
+Output written on rapport-stage.pdf (41 pages, 410571 bytes).
 PDF statistics:
- 1176 PDF objects out of 1200 (max. 8388607)
+ 1136 PDF objects out of 1200 (max. 8388607)
  114 named destinations out of 1000 (max. 500000)
- 413 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 433 words of extra memory for PDF output out of 10000 (max. 10000000)
 
