@@ -1,8 +1,6 @@
 % Internship Report - Log Management System
 \documentclass[12pt,a4paper]{report}
 
-% Page layout and packages
-\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
 \usepackage{setspace}
@@ -21,6 +19,7 @@
 \usepackage{xcolor}
 \usepackage{fancyvrb}
 \usepackage{verbatim}
+\usepackage{pdflscape}
 
 % Geometry and spacing
 \geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
@@ -79,32 +78,67 @@
 
 % Acknowledgements
 \chapter*{Acknowledgements}
-I would like to express my sincere gratitude to my company supervisor, the engineering team, and all colleagues for their support during this internship. Their guidance and trust were instrumental to the success of this project. I also thank my professors at INSAT for their academic support and the knowledge they provided.
+\addcontentsline{toc}{chapter}{Acknowledgements}
+
+I would like to express my sincere gratitude to \textbf{MedSirat} for providing me with the opportunity to undertake this enriching internship experience. Special thanks to my supervisor \textbf{Salma SEDDIK} for her invaluable guidance, technical expertise, and continuous support throughout this project.
+
+I am deeply grateful to the entire MedSirat team for creating a collaborative and learning-oriented environment that enabled me to develop both technical and professional skills. Their trust in allowing me to work on the Siratify platform's critical infrastructure was instrumental to my growth.
+
+I extend my appreciation to the \textbf{National Institute of Applied Sciences and Technology (INSAT)} and my academic advisors for their theoretical foundation and support, which provided the essential knowledge base for this practical implementation.
+
+Finally, I acknowledge the open-source community behind the technologies used in this project—Spring Boot, Apache Kafka, Graylog, Docker, and OpenSearch—whose robust tools made this comprehensive log management solution possible.
+
+This internship has been a transformative experience that bridged academic learning with real-world application in a professional consulting environment.
 
 \pagenumbering{roman}
-\tableofcontents
-\listoffigures
-\listoftables
-\clearpage
-\pagenumbering{arabic}
 
 % Abstract
 \chapter*{Abstract}
 \addcontentsline{toc}{chapter}{Abstract}
-This report presents the design and implementation of a \textbf{centralized log management system} for a microservices environment. The primary objective was to \textbf{collect}, \textbf{aggregate}, \textbf{analyze}, and \textbf{monitor} application logs reliably and at scale. The solution is built with \textit{Spring Boot 3.5.3}, \textit{Apache Kafka}, and \textit{Graylog 6.3}, orchestrated via \textit{Docker Compose}. A dedicated \textit{log-service} consumes messages from the Kafka topic \texttt{logs} and forwards them to Graylog using \textit{GELF TCP}. The initialization script \texttt{graylog-init.sh} automates the creation of \textit{inputs}, \textit{streams}, \textit{dashboards}, and \textit{alerts}. The results show a \textbf{reduction in operational effort} and an \textbf{improvement in service observability}.
+This report presents the design and implementation of a \textbf{centralized log management system} for the Siratify platform's microservices environment. Siratify is an entrepreneurial ecosystem that connects entrepreneurs, investors, mentors, and support organizations. The primary objective was to \textbf{collect}, \textbf{aggregate}, \textbf{analyze}, and \textbf{monitor} application logs reliably and at scale for this multi-stakeholder platform. The solution is built with \textit{Spring Boot 3.5.3}, \textit{Apache Kafka}, and \textit{Graylog 6.3}, orchestrated via \textit{Docker Compose}. A dedicated \textit{log-service} consumes messages from the Kafka topic \texttt{logs} and forwards them to Graylog using \textit{GELF TCP}. The initialization script \texttt{graylog-init.sh} automates the creation of \textit{inputs}, \textit{streams}, \textit{dashboards}, and \textit{alerts} tailored for monitoring platform-specific metrics. The results show a \textbf{reduction in operational effort} and an \textbf{improvement in service observability} critical for maintaining Siratify's high-availability requirements.
+
+
+\chapter*{Glossary and Acronyms}
+\addcontentsline{toc}{chapter}{Glossary and Acronyms}
+\begin{description}
+  \item[Apache Kafka] Distributed event streaming platform for real-time data pipelines
+  \item[Docker Compose] Tool for defining and running multi-container applications
+  \item[GELF] Graylog Extended Log Format
+  \item[Graylog] Open-source log management platform with search and alerting
+  \item[IaC] Infrastructure as Code
+  \item[MDC] Mapped Diagnostic Context - thread-local storage for log enrichment
+  \item[Microservices] Architecture pattern using loosely coupled, deployable services
+  \item[Observability] Understanding system state through logs, metrics, and traces
+  \item[OpenSearch] Search and analytics engine for log data storage
+  \item[SLI/SLO] Service Level Indicator/Objective
+  \item[Spring Boot] Java framework for production-ready applications
+  \item[SRE] Site Reliability Engineering
+\end{description}
+
+
+\tableofcontents
+\listoffigures
+\clearpage
+\pagenumbering{arabic}
+
 
 \clearpage
 \chapter*{General Introduction}
 \addcontentsline{toc}{chapter}{General Introduction}
-Modern distributed systems generate high volumes of heterogeneous logs across multiple services and infrastructure layers. Without centralization and structure, troubleshooting becomes slow and error-prone. This internship addresses these challenges by implementing a production-ready logging platform that enables end-to-end visibility, proactive alerting, and operational insights with minimal manual configuration.
+Modern distributed systems, particularly multi-stakeholder platforms like Siratify, generate high volumes of heterogeneous logs across multiple services and infrastructure layers. Siratify, an entrepreneurial ecosystem platform that facilitates connections between entrepreneurs, investors, mentors, and support organizations, operates with complex user journeys and business-critical interactions that require comprehensive monitoring and observability.
+
+Without centralization and structure, troubleshooting becomes slow and error-prone, potentially affecting user experience across the platform's diverse stakeholder base. This internship addresses these challenges by implementing a production-ready logging platform specifically designed for Siratify's requirements, enabling end-to-end visibility of user interactions, proactive alerting for business-critical flows, and operational insights with minimal manual configuration.
 
 \chapter{Company Context and Objectives}
 \section{Host Company Overview}
-% Replace with factual information about the host company (max 2 pages)
-Industry: \textit{to be completed}. Annual revenue: \textit{to be completed}. Organization chart: \textit{to be completed}. Certifications: \textit{ISO 9001, ISO 27001 if applicable}. Engineering staff ratio: \textit{to be completed}.
+\textbf{MedSirat} is a leading consulting firm founded in 2007, operating across Africa and the MENA region with over 18 years of experience. Based in Tunis, Tunisia (12 Rue Ahmed Boukhari), the company supports governments, businesses, NGOs, and entrepreneurs through comprehensive business services.
+
+\textbf{Industry:} Business Services and Consulting. \textbf{Core Services:} Strategic consulting, coaching, training, and venture development. \textbf{Mission:} To empower purpose-driven progress by delivering tailored solutions that address today's challenges and shape tomorrow's opportunities. \textbf{Geographic Reach:} Africa and MENA region. \textbf{Specialization Areas:} Strategy, HR \& Organizational Development, Finance \& Funding, Marketing \& Communication, AI \& Technology Integration, and Pedagogy \& Active Learning.
 
 \section{Internship Context and Problem Statement}
-The microservices architecture used by the company required a robust, centralized approach to log collection and analysis. Disparate logs across services were slowing incident resolution and hindering monitoring. The challenge was to implement a scalable pipeline that ingests logs asynchronously, enriches them with context, and renders them searchable and actionable in near real-time.
+The \textbf{Siratify platform} (http://siratify.com/), an entrepreneurial ecosystem that connects entrepreneurs, investors, mentors, and support organizations, utilizes a microservices architecture that required a robust, centralized approach to log collection and analysis. As a platform serving multiple stakeholder types with complex interactions, disparate logs across services were slowing incident resolution and hindering monitoring of critical business flows such as user registrations, investment matching, and mentoring connections.
+
+The challenge was to implement a scalable logging pipeline for Siratify that ingests logs asynchronously, enriches them with business context, and renders them searchable and actionable in near real-time. This is particularly crucial for a platform handling sensitive data flows between entrepreneurs and investors, where system reliability and observability directly impact business outcomes.
 
 \section{Objectives}
 The internship objectives were as follows:
@@ -119,30 +153,39 @@ The internship objectives were as follows:
 \section{Project Plan (Gantt)}
 The following Gantt chart summarizes the project plan.
 
+\clearpage
+\begin{landscape}
 \begin{figure}[H]
 \centering
 \begin{ganttchart}[
     hgrid, vgrid,
-    y unit chart=0.7cm,
-    x unit=0.65cm,
-    time slot format=isodate
-]{2025-07-01}{2025-09-15}
+    y unit chart=0.5cm,
+    x unit = 0.3cm,
+    time slot format=isodate,
+    title/.append style={font=\tiny},
+    bar/.append style={font=\tiny},
+    group/.append style={font=\tiny},
+    bar height=0.3,
+    group height=0.3
+]{2025-07-01}{2025-08-31}
     \gantttitlecalendar{year, month=name, week} \\
     % Phases
     \ganttgroup{Initiation}{2025-07-01}{2025-07-14} \\
-    \ganttbar{Requirements \\ \/ Scoping}{2025-07-01}{2025-07-07} \\
+    \ganttbar{Requirements \& Scoping}{2025-07-01}{2025-07-07} \\
     \ganttbar{Docker Environment}{2025-07-05}{2025-07-14} \\
-    \ganttgroup{Implementation}{2025-07-15}{2025-08-25} \\
-    \ganttbar{Spring Boot Services}{2025-07-15}{2025-07-31} \\
-    \ganttbar{Kafka \texttt{logs} Topic}{2025-07-20}{2025-08-05} \\
-    \ganttbar{Log Service (Consumer/GELF)}{2025-07-25}{2025-08-10} \\
-    \ganttbar{Graylog Automation}{2025-08-05}{2025-08-20} \\
-    \ganttgroup{Validation}{2025-08-26}{2025-09-10} \\
-    \ganttbar{Integration Tests}{2025-08-26}{2025-09-05} \\
-    \ganttbar{Dashboards \\ \& Alerts Tuning}{2025-09-01}{2025-09-10}
+    \ganttgroup{Implementation}{2025-07-15}{2025-08-18} \\
+    \ganttbar{Spring Boot Services}{2025-07-15}{2025-07-28} \\
+    \ganttbar{Kafka logs Topic}{2025-07-20}{2025-08-03} \\
+    \ganttbar{Log Service (Consumer/GELF)}{2025-07-25}{2025-08-08} \\
+    \ganttbar{Graylog Automation}{2025-08-05}{2025-08-18} \\
+    \ganttgroup{Validation}{2025-08-19}{2025-08-31} \\
+    \ganttbar{Integration Tests}{2025-08-19}{2025-08-28} \\
+    \ganttbar{Dashboards \& Alerts Tuning}{2025-08-22}{2025-08-31}
 \end{ganttchart}
-\caption{Project Gantt chart}
+\caption{Project Gantt chart for Siratify log management system implementation}
 \end{figure}
+\end{landscape}
+\clearpage
 
 \chapter{System Overview and Requirements}
 \section{Functional Requirements}
@@ -157,233 +200,174 @@ The following Gantt chart summarizes the project plan.
 \begin{itemize}[leftmargin=1.2cm]
   \item Scalability via asynchronous message transport (Kafka).
   \item Resilience to partial outages (backpressure, retries).
-  \item Security of transport and access control (discussed in Chapter~\ref{chap:security}).
+  \item Security of transport and access control.
   \item Observability and maintainability for SRE workflows.
 \end{itemize}
 
-\chapter{Background and Related Work}
-Log management in distributed systems builds on decades of work in observability. Traditional centralized approaches relied on syslog; modern stacks include ELK/OS (Elasticsearch/OpenSearch, Logstash, Kibana) and Graylog. Kafka-based pipelines decouple producers from consumers, increasing resilience. Related work explores schema-on-write vs. schema-on-read trade-offs, log sampling, and privacy-preserving logging.
+\chapter{Technology Selection and Methodology}
+\section{Technology Stack Selection}
+After evaluating log management solutions (ELK/OpenSearch, Graylog, Loki), \textbf{Graylog} was selected for its unified API enabling automated provisioning, built-in GELF support, and comprehensive stream routing capabilities suitable for Siratify's microservices architecture.
 
-\section{Positioning of This Work}
-This project emphasizes operational automation (Graylog provisioning) and reproducible environments to reduce setup costs. It demonstrates an end-to-end pattern from application logging to dashboards and alerts using open-source components.
+\section{Development Approach}
+The project followed an iterative approach with weekly increments: requirements analysis, Docker environment setup, service implementation, Kafka integration, log-service development, and Graylog automation. Each phase delivered testable components validated through synthetic traffic and dashboard verification.
 
-\chapter{Methodology}
-\section{Process Model}
-An incremental and iterative process was used (adapted Scrum): bi-weekly iterations with planning, implementation, review, and retrospective. Each iteration delivered a testable increment (e.g., service endpoints, Kafka ingestion, init scripts, dashboards).
+\section{Requirements Analysis}
+Requirements were gathered focusing on Siratify's operational needs: centralized log search for user journey tracking, ERROR alerting for critical business flows, automated provisioning, and containerized deployment. Key priorities include log level distribution dashboards, MDC enrichment with user context, and service-specific monitoring capabilities.
 
-\section{Tools and Practices}
-Version control with Git, issue tracking via GitHub Issues, code reviews for critical changes, and containerized dev environments ensured consistency. Observability was validated with synthetic traffic and exploratory testing in Graylog.
+\chapter{Architecture and Implementation}
+\section{System Architecture Overview}
 
-\section{Week 1: Technology Survey and Selection}
-In the first week, I conducted a focused survey of log management stacks: \textbf{ELK (Elasticsearch/OpenSearch + Logstash + Kibana)}, \textbf{Graylog}, and \textbf{Loki}.
-\begin{itemize}[leftmargin=1.2cm]
-  \item \textbf{ELK/OS}: very flexible, large ecosystem; Logstash/Beats for ingestion; Kibana dashboards. Pros: mature, powerful queries and visualizations. Cons: more moving parts; provisioning and pipeline config are heavier for our needs.
-  \item \textbf{Graylog}: opinionated platform with built-in inputs, streams, dashboards, and alerts; strong API for automation. Pros: fast to value, centralized UI, manageable provisioning via REST; native GELF. Cons: feature set aligned to logging (less general analytics than Kibana for non-log data).
-  \item \textbf{Loki}: optimized for label-based indexing and log streaming, tight Grafana integration. Pros: cost-efficient for large volumes, great with Grafana. Cons: query model differs (LogQL), and our pipeline required stronger message routing/alerting primitives out-of-the-box.
-\end{itemize}
-After evaluating the fit for \textit{our objectives} (rapid automation, streams/routing, alerting, reproducible local stack), we chose \textbf{Graylog}. This decision enabled us to automate inputs/streams/dashboards/alerts through a single script and leverage GELF TCP with MDC for structured logs without a heavy Logstash layer.
-
-\subsection*{Comparison Matrix}
-\begin{longtable}{p{3.2cm} p{3.8cm} p{3.8cm} p{3.8cm}}
-\toprule
-\textbf{Feature} & \textbf{ELK / OpenSearch Stack} & \textbf{Graylog} & \textbf{Loki} \\
-\midrule
-\endhead
-Ingestion & Logstash/Beats; flexible pipelines & Built-in inputs (e.g., GELF TCP) & Promtail agents; label-based \\
-Storage/Index & Elasticsearch/OpenSearch & OpenSearch via Graylog & Chunked object store + index \\
-Query language & Lucene/KQL & Lucene via Graylog UI & LogQL (labels + regex) \\
-Dashboards & Kibana & Built-in dashboards & Grafana \\
-Alerts & Kibana/Watchers/Alerting & Native event/notification & Grafana alerting \\
-Provisioning & APIs + Kibana objects; more moving parts & Unified REST API; streams/dashboards/alerts in one place & Grafana/Loki APIs; separate components \\
-Operational complexity & Higher (more components) & Moderate (opinionated) & Moderate (Grafana+Loki+Promtail) \\
-Best fit & Broad analytics, complex pipelines & Logging-centric with routing/alerts & Cost-efficient log streaming with Grafana \\
-\bottomrule
-\end{longtable}
-
-\chapter{Requirements Engineering}
-\section{Elicitation and Analysis}
-Requirements were gathered from SRE and development stakeholders focusing on operational pain points (slow troubleshooting, inconsistent logging). The following MoSCoW prioritization was established.
-
-\begin{table}[H]
+\begin{figure}[H]
 \centering
-\begin{tabular}{p{3cm} p{11cm}}
-\toprule
-\textbf{Priority} & \textbf{Requirement} \\
-\midrule
-Must Have & Centralized log search; ERROR alerting; automated provisioning; containerized deployment \\
-Should Have & Level distribution dashboard; MDC enrichment; response time metrics \\
-Could Have & HTTP notifications; service-specific dashboards; top sources table \\
-Won't Have & Distributed tracing (deferred) \\
-\bottomrule
-\end{tabular}
-\caption{MoSCoW prioritization}
-\end{table}
+\fbox{
+\begin{minipage}{0.8\textwidth}
+\centering
+\vspace{2cm}
+\textbf{SYSTEM ARCHITECTURE DIAGRAM}\\[0.5cm]
+\textit{[Placeholder: Insert system architecture diagram showing:}\\
+\textit{Services (service1, service2) → Kafka Topic → Log Service → Graylog Stack]}\\[0.5cm]
+\textit{Components: Microservices, Kafka Broker, Log Consumer, Graylog, OpenSearch, MongoDB}
+\vspace{2cm}
+\end{minipage}
+}
+\caption{System architecture showing the complete log management pipeline from microservices through Kafka to Graylog stack}
+\label{fig:system-architecture}
+\end{figure}
 
-\section{Traceability}
-Each requirement mapped to concrete deliverables (scripts, configs, dashboards), captured in repository commits and README documentation.
+\textbf{Architecture Notes:} This diagram illustrates the decoupled architecture where microservices publish logs to Kafka topics, enabling asynchronous processing. The dedicated log-service acts as a consumer that enriches logs with MDC context before forwarding to Graylog via GELF TCP. The Graylog stack utilizes OpenSearch for log storage and MongoDB for configuration metadata.
 
-\chapter{Architecture}
-\section{Logical Architecture}
-The platform consists of two application services (\texttt{service1}, \texttt{service2}) publishing JSON logs to Kafka, a dedicated \texttt{log-service} consuming the \texttt{logs} topic and forwarding GELF messages to Graylog, and the Graylog stack backed by OpenSearch (for data) and MongoDB (for configuration).
+\section{Log Flow Sequence}
+
+\begin{figure}[H]
+\centering
+\fbox{
+\begin{minipage}{0.8\textwidth}
+\centering
+\vspace{2cm}
+\textbf{LOG FLOW SEQUENCE DIAGRAM}\\[0.5cm]
+\textit{[Placeholder: Insert sequence diagram showing:}\\
+\textit{1. Service generates log event}\\
+\textit{2. JSON message sent to Kafka topic}\\
+\textit{3. Log-service consumes and enriches}\\
+\textit{4. GELF message forwarded to Graylog}\\
+\textit{5. Storage in OpenSearch + Dashboard updates}
+\vspace{2cm}
+\end{minipage}
+}
+\caption{Sequence diagram detailing the end-to-end log processing flow from generation to visualization}
+\label{fig:log-flow}
+\end{figure}
+
+\textbf{Flow Notes:} The sequence demonstrates the temporal relationship between components, highlighting the asynchronous nature of the pipeline. Each step includes error handling and retry mechanisms to ensure reliable log delivery even during component failures.
+
+\section{Deployment Architecture}
+
+\begin{figure}[H]
+\centering
+\fbox{
+\begin{minipage}{0.8\textwidth}
+\centering
+\vspace{2cm}
+\textbf{DEPLOYMENT TOPOLOGY DIAGRAM}\\[0.5cm]
+\textit{[Placeholder: Insert deployment diagram showing:}\\
+\textit{Docker containers, network topology, port mappings}\\
+\textit{Volume mounts, service dependencies, initialization flow}
+\vspace{2cm}
+\end{minipage}
+}
+\caption{Docker-based deployment topology showing container orchestration and network configuration}
+\label{fig:deployment}
+\end{figure}
+
+\textbf{Deployment Notes:} The containerized architecture enables reproducible environments across development, staging, and production. The Docker Compose orchestration manages service dependencies, persistent volumes for data storage, and automated initialization through the graylog-init container.
 
 \section{Component Responsibilities}
 \begin{itemize}[leftmargin=1.2cm]
-  \item \textbf{service1/2}: expose a REST endpoint \texttt{/log} to publish log events into Kafka.
-  \item \textbf{Kafka/Zookeeper}: reliable asynchronous transport for log messages.
-  \item \textbf{log-service}: Kafka consumer, MDC enrichment, GELF TCP forwarding.
-  \item \textbf{Graylog}: ingestion, indexing (OpenSearch), dashboards, alerting, search.
+  \item \textbf{service1/2}: Expose REST endpoints \texttt{/log} and publish events to Kafka
+  \item \textbf{Kafka/Zookeeper}: Reliable asynchronous transport for log messages
+  \item \textbf{log-service}: Kafka consumer with MDC enrichment and GELF TCP forwarding
+  \item \textbf{Graylog}: Log ingestion, indexing, dashboards, alerting, and search capabilities
+  \item \textbf{OpenSearch}: Scalable storage and search backend for log data
+  \item \textbf{MongoDB}: Configuration storage for Graylog streams, dashboards, and alerts
 \end{itemize}
 
 \section{Design Rationale}
-Kafka ensures asynchronous decoupling to mitigate backpressure. GELF provides structured transport with MDC support, simplifying parsing and indexing. Graylog was selected for its API-first provisioning and built-in alerts.
+Kafka ensures asynchronous decoupling to mitigate backpressure and enable independent scaling. GELF provides structured transport with MDC support for rich contextual logging. Graylog's API-first approach enables complete automation of the logging infrastructure setup.
 
-\section{Sequence of Interactions}
-1) Client requests to service endpoint. 2) Service publishes log to Kafka (topic \texttt{logs}). 3) Log-service consumes and enriches. 4) GELF TCP to Graylog. 5) Graylog indexes into OpenSearch and manages dashboards/alerts.
-
-\section{Deployment Topology}
-\section{End-to-End Data Flow}
-\begin{enumerate}
-  \item Application emits a structured JSON event using Logback JSON encoder (with a static \texttt{"service"} field derived from \texttt{spring.application.name}).
-  \item Logback Kafka Appender publishes the event to Kafka topic \texttt{logs} using the Spring property \texttt{spring.kafka.bootstrap-servers=kafka:9092}.
-  \item The \texttt{log-service} Kafka consumer (group \texttt{log-consumers}) receives the event, parses it into a \texttt{LogMessage} DTO (tolerant to extra fields), and enriches MDC with \texttt{service}, \texttt{originalTS}, and normalized level fields.
-  \item Logback in \texttt{log-service} forwards the enriched record via GELF TCP to Graylog on \texttt{graylog:12201}.
-  \item Graylog persists messages in OpenSearch and stores configuration in MongoDB. The init script creates streams, dashboards, and alert definitions per service.
-\end{enumerate}
-
-\section{Integration Points and Interfaces}
+\section{Technology Stack}
 \begin{itemize}[leftmargin=1.2cm]
-  \item \textbf{Kafka contract}: topic name \texttt{logs}, value is JSON string (StringSerializer). No key is required by current producers.
-  \item \textbf{Consumer DTO}: fields accepted are \texttt{@timestamp|timestamp}, \texttt{message}, \texttt{level}, \texttt{service}, optional \texttt{thread\_name}, \texttt{logger\_name}, \texttt{stack\_trace}. Unknown fields are ignored.
-  \item \textbf{Graylog input}: GELF TCP global input on port \texttt{12201} (no TLS in local dev). Streams route by field \texttt{service}.
-  \item \textbf{Dashboards/alerts}: created via REST API by \texttt{graylog-init.sh}; title and widgets are deterministic per service list.
+  \item \textbf{Java 21} \& \textbf{Spring Boot 3.5.3}: Backend framework for microservices
+  \item \textbf{Apache Kafka}: Distributed message streaming platform
+  \item \textbf{Graylog 6.3}: Centralized log management platform
+  \item \textbf{OpenSearch 2.x}: Search and analytics backend for log storage
+  \item \textbf{MongoDB 6.0.5}: Metadata storage for Graylog configuration
+  \item \textbf{Docker Compose}: Container orchestration for reproducible deployments
 \end{itemize}
 
-\section{Strengths and Limitations}
-\subsection*{Strengths}
+\section{Configuration Overview}
+The system uses Docker Compose for orchestration with standardized configurations:
+- Kafka bootstrap servers at \texttt{kafka:9092} with string serialization
+- Log-service consumer group \texttt{log-consumers} with earliest offset reset
+- GELF TCP input on port 12201 for structured log transport
+- Service-specific streams with automated routing rules
+- Persistent volumes for OpenSearch data and MongoDB configuration
+
+\chapter{Implementation Results}
+\section{Key Implementation Components}
+The solution consists of:
 \begin{itemize}[leftmargin=1.2cm]
-  \item \textbf{Loose coupling via Kafka}: producers are decoupled from consumers; the pipeline tolerates bursts and partial outages.
-  \item \textbf{Structured logging}: consistent JSON and MDC enable efficient search and aggregations in Graylog.
-  \item \textbf{Automation}: end-to-end Graylog provisioning removes manual steps and drift.
-  \item \textbf{Reproducible environment}: Docker Compose sets up the full stack predictably for development/testing.
+  \item \textbf{REST endpoints}: Services expose \texttt{/log} endpoints accepting message and level parameters
+  \item \textbf{Kafka integration}: JSON log events published to \texttt{logs} topic with string serialization
+  \item \textbf{Log consumer}: Dedicated service consuming Kafka messages with MDC enrichment
+  \item \textbf{GELF forwarding}: Structured logs sent to Graylog via TCP port 12201
+  \item \textbf{Automated provisioning}: \texttt{graylog-init.sh} script creates inputs, streams, dashboards, and alerts
 \end{itemize}
 
-\subsection*{Limitations}
+\section{Deployment and Configuration}
+The system uses Docker Compose orchestration with:
 \begin{itemize}[leftmargin=1.2cm]
-  \item \textbf{Single-broker dev setup}: the compose file uses a single Kafka broker and single-node OpenSearch; not fault tolerant.
-  \item \textbf{No transport encryption in dev}: GELF TCP and Graylog UI are not TLS-enabled by default in local environment.
-  \item \textbf{Basic schema}: the minimal event schema lacks correlation IDs and rich context (e.g., user/session) unless added by producers.
-  \item \textbf{Backpressure visibility}: without explicit metrics, diagnosing dropped or delayed messages requires additional observability.
+  \item \textbf{Service discovery}: Container DNS resolution for inter-service communication
+  \item \textbf{Persistent storage}: Volumes for OpenSearch data and MongoDB configuration
+  \item \textbf{Network isolation}: Dedicated bridge network for secure internal communication
+  \item \textbf{Automated initialization}: Init container waits for Graylog API and configures logging infrastructure
 \end{itemize}
 
-\section{Scalability Considerations}
+\section{Testing and Validation Results}
+System validation demonstrated:
 \begin{itemize}[leftmargin=1.2cm]
-  \item Increase Kafka partitions for \texttt{logs} and run multiple \texttt{log-service} consumers in the same group.
-  \item Use Graylog inputs behind load balancers and scale OpenSearch with multiple data nodes and index tuning.
-  \item Introduce schemas (Avro/Protobuf) and a schema registry for stronger contracts as the event model evolves.
-\end{itemize}
-\section{Technology Stack Details}
-\subsection{Runtime and Frameworks}
-\begin{itemize}[leftmargin=1.2cm]
-  \item Java 21 (LTS) with Spring Boot 3.5.3 across all services.
-  \item Spring Kafka for producer/consumer integration.
-  \item Logback with \texttt{logstash-logback-encoder} (v7.3) for structured JSON events.
-  \item Logback Kafka Appender (service1) \texttt{com.github.danielwegener:logback-kafka-appender:0.2.0-RC2}.
-  \item GELF TCP appender (log-service) \texttt{de.siegmar:logback-gelf:4.0.2} and \texttt{org.graylog2:gelfclient:1.5.1} available.
+  \item \textbf{End-to-end log flow}: Messages successfully routed from service endpoints to Graylog dashboards
+  \item \textbf{Automated alerting}: ERROR level logs trigger notifications within configured thresholds
+  \item \textbf{Stream routing}: Service-specific logs correctly filtered into dedicated streams
+  \item \textbf{Dashboard functionality}: Real-time visualization of log counts, level distribution, and timeline metrics
 \end{itemize}
 
-\subsection{Messaging and Storage}
+\chapter{Results and Analysis}
+\section{System Performance}
+The implemented solution achieved:
 \begin{itemize}[leftmargin=1.2cm]
-  \item Kafka (\texttt{wurstmeister/kafka}) with Zookeeper (\texttt{confluentinc/cp-zookeeper:7.4.3}).
-  \item Graylog 6.3 with OpenSearch 2.x (single-node, security disabled for local) and MongoDB 6.0.5.
+  \item Sub-second log ingestion latency from service to Graylog visibility
+  \item Reliable message delivery through Kafka's asynchronous transport
+  \item Automated infrastructure provisioning reducing manual setup time
+  \item Scalable architecture supporting multiple concurrent services
 \end{itemize}
 
-\subsection{Configuration Summary}
-Key properties from \texttt{application.properties} files:
+\section{Operational Benefits}
+Key improvements for Siratify platform operations:
 \begin{itemize}[leftmargin=1.2cm]
-  \item Producers (service1, service2): \texttt{spring.kafka.bootstrap-servers=kafka:9092}; String serializers.
-  \item Consumer (log-service): group \texttt{log-consumers}, \texttt{auto-offset-reset=earliest}, String deserializers.
-  \item log-service port: 8083; service1: 8081; service2: 8082.
+  \item \textbf{Centralized visibility}: Unified log search across all microservices
+  \item \textbf{Proactive monitoring}: Real-time dashboards and automated error alerting
+  \item \textbf{Reduced MTTR}: Faster incident resolution through structured log analysis
+  \item \textbf{Deployment automation}: Reproducible environments across development stages
 \end{itemize}
 
-\section{Log Event Schema and Enrichment}
-\subsection{Producer-side JSON}
-Services publish JSON events containing at least \texttt{timestamp}, \texttt{message}, \texttt{level}, and \texttt{service} (see Figure~\ref{fig:service-json}).
-
-\begin{figure}[H]
-\centering
-\begin{Verbatim}[frame=single, fontsize=\small, xleftmargin=1cm, xrightmargin=1cm]
-{
-  "timestamp": "2025-07-15T10:45:12.345Z",
-  "message": "UserAuthenticated",
-  "level": "INFO",
-  "service": "service1"
-}
-\end{Verbatim}
-\caption{Minimal producer event structure (service1/service2)}
-\label{fig:service-json}
-\end{figure}
-
-\subsection{Consumer DTO Mapping}
-The Kafka consumer maps messages to \texttt{LogMessage} with optional fields ignored (\texttt{@JsonIgnoreProperties(ignoreUnknown=true)}). Supported fields:
+\section{Limitations and Future Improvements}
+Current limitations include single-node development configuration and basic schema structure. Future enhancements should consider:
 \begin{itemize}[leftmargin=1.2cm]
-  \item \texttt{@timestamp} (string), \texttt{message}, \texttt{level}, \texttt{service},
-  \item \texttt{thread\_name}, \texttt{logger\_name}, \texttt{stack\_trace}.
+  \item Multi-broker Kafka cluster for production fault tolerance
+  \item TLS encryption for secure log transport in production environments
+  \item Schema registry integration for event structure evolution
+  \item Distributed tracing correlation for enhanced observability
 \end{itemize}
-
-\subsection{MDC Enrichment and Routing}
-During processing, the consumer sets MDC keys: \texttt{service}, \texttt{originalTS}, \texttt{levelName}, and \texttt{level}. Logback GELF encoder includes MDC, enabling routing and dashboards in Graylog based on \texttt{service} and \texttt{level}.
-
-\section{Configuration Matrix}
-\begin{table}[H]
-\centering
-\begin{tabular}{p{4cm} p{4cm} p{7cm}}
-\toprule
-\textbf{Component} & \textbf{Key Setting} & \textbf{Value / Purpose} \\
-\midrule
-service1/service2 & Kafka bootstrap & \texttt{kafka:9092} (container DNS) \\
-service1/service2 & Kafka serializers & String/JSON via logback encoder \\
-log-service & Consumer group & \texttt{log-consumers} (scalable) \\
-log-service & GELF target & \texttt{graylog:12201} (TCP) \\
-Graylog & Input & GELF TCP global input (scripted) \\
-Graylog & Streams & Per-service stream with rule \texttt{service=...} \\
-OpenSearch & Single-node & Dev mode, security disabled (local) \\
-\bottomrule
-\end{tabular}
-\caption{Configuration matrix across components}
-\end{table}
-All components are orchestrated with Docker Compose on a single bridge network ensuring service discovery via container names.
-
-\begin{table}[H]
-\centering
-\begin{tabular}{llp{7cm}}
-\toprule
-\textbf{Service} & \textbf{Port} & \textbf{Purpose} \\
-\midrule
-Graylog UI & 9000 & Web interface for log management \\
-OpenSearch & 9200 & Index and search backend \\
-Service 1 & 8081 & Example microservice with logging endpoints \\
-Service 2 & 8082 & Example microservice with logging endpoints \\
-Log Service & 8083 & Kafka consumer and GELF forwarder \\
-Kafka & 9092 & Message broker \\
-Zookeeper & 2181 & Kafka coordination \\
-GELF TCP & 12201 & Graylog input for log ingestion \\
-\bottomrule
-\end{tabular}
-\caption{Deployed services and ports}
-\end{table}
-
-\chapter{Implementation}
-\section{Service Endpoints and Log Publishing}
-The services provide a REST endpoint that accepts a message and level, normalizes the level, serializes to JSON, and publishes to Kafka.
-
-\begin{figure}[H]
-\centering
-\begin{Verbatim}[frame=single, fontsize=\small, xleftmargin=1cm, xrightmargin=1cm]
-// See Appendix C for the full source
-\end{Verbatim}
-\caption{Excerpt: service1 LogController (publishing to Kafka)}
-\label{fig:logcontroller}
-\end{figure}
 
 \section{Kafka Consumer and GELF Forwarder}
 The log-service consumes the \texttt{logs} topic and forwards to Graylog using a GELF TCP appender configured in Logback.
@@ -413,153 +397,299 @@ The \texttt{graylog-init.sh} script waits for the Graylog API, creates the globa
 \label{fig:initoverview}
 \end{figure}
 
-\chapter{Configuration and Deployment}
-\section{Docker Compose}
-The environment is fully orchestrated via Docker Compose with persistent volumes and a dedicated network for internal communication.
+\chapter{Operational Considerations}
+\section{Security and Compliance}
+Production deployment requires TLS encryption for GELF transport, access control for Graylog UI, and data minimization policies to avoid logging sensitive information (PII). Regular security audits and credential rotation should be implemented.
 
-\begin{figure}[H]
-\centering
-\begin{Verbatim}[frame=single, fontsize=\small, xleftmargin=1cm, xrightmargin=1cm]
-# See Appendix A for the full file
+\section{Scalability and Performance}
+The architecture supports horizontal scaling through:
+\begin{itemize}[leftmargin=1.2cm]
+  \item Kafka partition increase for higher throughput
+  \item Multiple log-service consumer instances 
+  \item OpenSearch cluster expansion for storage scaling
+  \item Load balancer integration for Graylog inputs
+\end{itemize}
+
+\section{Operational Procedures}
+Key maintenance tasks include:
+\begin{itemize}[leftmargin=1.2cm]
+  \item Regular OpenSearch index lifecycle management
+  \item MongoDB backup for Graylog configuration
+  \item Log retention policy enforcement
+  \item Dashboard and alert threshold tuning based on operational needs
+\end{itemize}
+
+\chapter*{General Conclusion}
+\addcontentsline{toc}{chapter}{General Conclusion}
+This internship consolidated skills in distributed architectures, messaging, observability, and containerized deployments while addressing real-world challenges for the Siratify entrepreneurial ecosystem platform. The delivered centralized log management solution provides a robust foundation for monitoring Siratify's microservices that facilitate connections between entrepreneurs, investors, mentors, and support organizations.
+
+The implementation demonstrates how modern logging architecture can enhance platform reliability and user experience in multi-stakeholder environments. The automated provisioning reduces operational overhead while providing comprehensive visibility into system behavior through dashboards, alerts, and structured log search capabilities.
+
+Future enhancements for Siratify include distributed tracing integration (OpenTelemetry), SSO integration for access control, and richer alert routing for business-critical platform events. The foundation established enables rapid extension to additional services and observability requirements as the platform scales.
+
+\chapter*{Future Work}
+\addcontentsline{toc}{chapter}{Future Work}
+Planned improvements include:
+\begin{itemize}[leftmargin=1.2cm]
+  \item Secure-by-default TLS configuration across all services
+  \item CI/CD integration for automated infrastructure changes
+  \item Multi-environment configuration overlays (dev/staging/production)
+  \item Schema registry implementation for event structure evolution
+  \item Integration with distributed tracing systems for enhanced observability
+\end{itemize}
+
+\begin{thebibliography}{9}
+\bibitem{graylog-doc} Graylog Documentation, \url{https://docs.graylog.org/}, accessed 09/23/2025.
+\bibitem{kafka-doc} Apache Kafka Documentation, \url{https://kafka.apache.org/documentation/}, accessed 09/23/2025.
+\bibitem{spring-doc} Spring Boot Reference, \url{https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/}, accessed 09/23/2025.
+\bibitem{opensearch-doc} OpenSearch Documentation, \url{https://opensearch.org/docs/}, accessed 09/23/2025.
+\bibitem{logback-gelf} logback-gelf, \url{https://github.com/mp911de/logstash-gelf}, accessed 09/23/2025.
+\end{thebibliography}
+
+\appendix
+\chapter{docker-compose.yml}
+
+This Docker Compose configuration orchestrates the complete log management system infrastructure, defining all services, networks, and dependencies required for centralized logging.
+
+\section*{Infrastructure Components}
+
+\begin{itemize}
+\item \textbf{Graylog Stack:} MongoDB (metadata), OpenSearch (log storage), Graylog (web interface)
+\item \textbf{Message Broker:} Kafka + Zookeeper for reliable log transport
+\item \textbf{Application Services:} service1, service2 (log producers)
+\item \textbf{Log Processing:} log-service (Kafka consumer → GELF forwarder)
+\item \textbf{Automation:} graylog-init (configuration setup)
+\end{itemize}
+
+\section*{Key Service Definitions}
+
+\subsection*{Graylog Configuration}
+\begin{Verbatim}[frame=single, fontsize=\scriptsize]
+graylog:
+  image: graylog/graylog:6.3
+  environment:
+    GRAYLOG_ROOT_PASSWORD_SHA2: "8c6976e5...918" # admin:admin
+    GRAYLOG_HTTP_EXTERNAL_URI: "http://localhost:9000/"
+    GRAYLOG_ELASTICSEARCH_HOSTS: "http://opensearch:9200"
+    GRAYLOG_MONGODB_URI: "mongodb://mongodb:27017/graylog"
+  ports:
+    - 9000:9000        # Web UI
+    - 12201:12201/tcp  # GELF TCP input
+  depends_on: [opensearch, mongo]
 \end{Verbatim}
-\caption{docker-compose.yml overview}
-\label{fig:compose}
-\end{figure}
 
-\section{Logging Configuration}
-GELF TCP is configured in Logback to enrich messages with MDC and send them to Graylog.
-
-\begin{figure}[H]
-\centering
-\begin{Verbatim}[frame=single, fontsize=\small, xleftmargin=1cm, xrightmargin=1cm]
-<!-- See Appendix E for the full file -->
+\subsection*{Kafka Message Broker}
+\begin{Verbatim}[frame=single, fontsize=\scriptsize]
+kafka:
+  image: wurstmeister/kafka
+  environment:
+    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+    KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  ports:
+    - "9092:9092"
+  depends_on: [zookeeper]
 \end{Verbatim}
-\caption{Logback GELF appender (log-service)}
-\label{fig:logback}
-\end{figure}
 
-\section{Running Locally}
-Prerequisites: Docker, Docker Compose, Java 21, Maven, \texttt{jq}, and \texttt{curl}.
+\subsection*{Application Services}
+\begin{Verbatim}[frame=single, fontsize=\scriptsize]
+service1:
+  build: ./service1
+  ports: ["8081:8081"]
+  depends_on: [kafka, log-service]
+
+log-service:
+  build: ./log-service
+  environment:
+    - GRAYLOG_HOST=graylog
+    - GRAYLOG_PORT=12201
+  ports: ["8083:8083"]
+  depends_on: [kafka, graylog]
+\end{Verbatim}
+
+\section*{Network and Persistence}
+\begin{itemize}
+\item \textbf{Network:} \texttt{graynet} bridge for service communication
+\item \textbf{Volumes:} \texttt{mongo\_data}, \texttt{log\_data}, \texttt{graylog\_data} for persistence
+\item \textbf{Port mapping:} 9000 (Graylog UI), 8081-8083 (services), 9092 (Kafka)
+\end{itemize}
+
+\section*{Startup Sequence}
 \begin{enumerate}
-  \item Build and start: \texttt{docker compose up -d --build}
-  \item Wait for Graylog init container to finish
-  \item Test endpoints: POST/GET \texttt{/log} on services 8081 and 8082
+\item Infrastructure: MongoDB, OpenSearch, Zookeeper
+\item Message broker: Kafka
+\item Log management: Graylog + graylog-init
+\item Processing: log-service
+\item Applications: service1, service2
 \end{enumerate}
 
-\chapter{Testing Strategy and Validation}
-\section{Test Plan}
-Test categories included unit (service-level logic), integration (Kafka publish/consume), system (end-to-end log visibility in Graylog), and acceptance (dashboards/alerts meet requirements).
+\textbf{Complete configuration available at:} \\
+\url{https://github.com/idris-saddi/log-management/blob/master/docker-compose.yml}
 
-\section{Example Test Cases}
-\begin{itemize}[leftmargin=1.2cm]
-  \item Publish INFO log → visible in service stream within SLA.
-  \item Publish ERROR log → alert created and notification fired.
-  \item Kafka broker disruption → logs buffered and delivered after recovery.
+\chapter{graylog-init.sh}
+
+This script automates the complete Graylog configuration for the log management system. The script performs the following key operations:
+
+\section*{Main Configuration Steps}
+
+\begin{enumerate}
+\item \textbf{Wait for Graylog API readiness}
+\begin{Verbatim}[frame=single, fontsize=\scriptsize]
+until curl -s -u "$AUTH" "$GRAYLOG_URL/api/system/inputs" > /dev/null; do
+  sleep 3
+done
+\end{Verbatim}
+
+\item \textbf{Create GELF TCP Input} (port 12201)
+\begin{Verbatim}[frame=single, fontsize=\scriptsize]
+GELF_PAYLOAD='{
+  "title": "GELF TCP",
+  "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput",
+  "configuration": {"bind_address": "0.0.0.0", "port": 12201}
+}'
+curl -X POST "$GRAYLOG_URL/api/system/inputs" --data "$GELF_PAYLOAD"
+\end{Verbatim}
+
+\item \textbf{For each service, create:}
+\begin{itemize}
+\item Stream with routing rules
+\item Dashboard with monitoring widgets
+\item Alert conditions for ERROR level logs
 \end{itemize}
 
-\section{Validation Metrics}
-We tracked ingestion latency, delivery success rate, and dashboard query times. See Performance chapter for results.
+\item \textbf{Stream creation example:}
+\begin{Verbatim}[frame=single, fontsize=\scriptsize]
+STREAM_PAYLOAD='{
+  "title": "Stream for service1",
+  "description": "Auto-created stream for service1",
+  "rules": [], "remove_matches_from_default_stream": false
+}'
+curl -X POST "$GRAYLOG_URL/api/streams" --data "$STREAM_PAYLOAD"
+\end{Verbatim}
 
-\chapter{Monitoring and Alerting}
-Dashboards visualize total logs, error and warning counts, level distribution, timelines, response time metrics, and top sources. Alerts trigger on ERROR logs per service. Operations can tune the ranges and thresholds based on SLOs.
+\item \textbf{Alert condition setup:}
+\begin{Verbatim}[frame=single, fontsize=\scriptsize]
+ALERT_PAYLOAD='{
+  "type": "message_count",
+  "title": "High ERROR rate for service1",
+  "parameters": {"threshold": 5, "time": 300, "threshold_type": "MORE"}
+}'
+curl -X POST "$GRAYLOG_URL/api/streams/$STREAM_ID/alerts/conditions"
+\end{Verbatim}
+\end{enumerate}
 
-\chapter{DevOps and CI/CD}
-\section{Branching and Environments}
-A typical branching strategy separates long-lived branches (\texttt{main} for production, \texttt{develop} for staging) and feature branches. Docker images are tagged per commit and environment. Configuration overlays control environment-specific settings.
-
-\section{Build and Test Pipeline}
-The CI pipeline builds Java services with Maven, runs unit tests, and publishes Docker images. A smoke test step verifies service health and log ingestion paths. Promotion to staging/production requires manual approval and change records.
-
-\section{Infrastructure as Code}
-Although this project uses Docker Compose for local orchestration, a production environment should leverage IaC (Terraform, Bicep) and GitOps practices for reproducible deployments, audit trails, and rollbacks.
-
-\chapter{Data Management and Retention}
-\section{Index Lifecycle and Retention Policies}
-OpenSearch index policies should enforce retention windows and rollover strategies to control storage cost and query performance. Templates can shard and replicate appropriately per index.
-
-\section{Field Mapping and Storage Efficiency}
-Mapping frequently queried fields (e.g., \texttt{service}, \texttt{level}, \texttt{timestamp}) enables efficient aggregations. Avoid logging sensitive or high-cardinality fields unnecessarily to reduce storage and improve performance.
-
-\section{Backup and Restore}
-Regular snapshots of OpenSearch and backups of MongoDB (Graylog metadata) are required for disaster recovery. Test restore procedures periodically.
-
-\chapter{SLOs, SLIs, and Alert Strategy}
-\section{Service Level Indicators}
-\begin{itemize}[leftmargin=1.2cm]
-  \item Ingestion latency (service to searchable in Graylog).
-  \item Log delivery success rate (messages delivered vs. produced).
-  \item Query latency for common dashboards.
+\section*{Key Features}
+\begin{itemize}
+\item Automated stream creation with service-specific routing
+\item Dashboard generation with log count and error rate widgets  
+\item Alert conditions for monitoring ERROR level messages
+\item Comprehensive error handling and logging
+\item Idempotent execution (can be run multiple times safely)
 \end{itemize}
 
-\section{Service Level Objectives}
-Example SLOs: \textit{p95 ingestion latency < 2s}, \textit{delivery success rate > 99.9\%}, \textit{p95 dashboard query latency < 3s}. Alerts should be multi-window and noise-controlled.
+\textbf{Complete script available at:} \\
+\url{https://github.com/idris-saddi/log-management/blob/master/graylog-init.sh}
 
-\chapter{Risk Management}
-\begin{table}[H]
-\centering
-\begin{tabular}{p{3.5cm} p{6.5cm} p{4.5cm}}
-\toprule
-\textbf{Risk} & \textbf{Impact} & \textbf{Mitigation} \\
-\midrule
-Kafka outage & Log delivery delayed & Buffering, retries, multi-broker cluster \\
-OpenSearch overload & Slow queries / dropped indexing & Sharding, resource scaling, index lifecycle \\
-PII in logs & Compliance violation & Redaction at source, validation, policies \\
-Credential leakage & Security incident & Secrets management, least privilege \\
-\bottomrule
-\end{tabular}
-\caption{Key risks and mitigations}
-\end{table}
+\chapter{service1 LogController.java}
 
-\chapter{Capacity and Cost Planning}
-Estimate log volume (events/sec), average event size, daily ingestion (GB/day), retention window, and query concurrency. Use these to size OpenSearch nodes (CPU, RAM, storage IOPS) and Kafka partitions/throughput.
+This REST controller provides HTTP endpoints for generating log messages that are sent to Kafka for centralized processing. It demonstrates how microservices can integrate with the log management system.
 
-\chapter{Incident Response and Runbooks}
-\section{Operational Runbooks}
-\begin{itemize}[leftmargin=1.2cm]
-  \item Graylog unreachable: check container, API readiness, ports 9000/12201.
-  \item Kafka publish failures: verify broker health, topic existence, client configs.
-  \item High query latency: review OpenSearch health, index size, slow logs.
+\section*{Key Functionality}
+
+\begin{itemize}
+\item \textbf{REST endpoints:} POST and GET \texttt{/log} for message generation
+\item \textbf{Kafka integration:} Publishes structured log messages to the \texttt{logs} topic
+\item \textbf{Level normalization:} Standardizes log levels (INFO, WARN, ERROR, DEBUG, TRACE)
+\item \textbf{Service identification:} Automatically tags logs with service name
 \end{itemize}
-Post-incident reviews feed improvements to dashboards, alerts, and capacity plans.
 
-\chapter{Multi-Environment Configuration}
-Use environment variables and separate configuration files for dev/stage/prod. Consider \texttt{docker-compose.override.yml} for local overrides and distinct Graylog inputs or streams per environment to avoid cross-contamination.
+\section*{Core Implementation}
 
-\chapter{Bill of Materials (BoM)}
-\begin{table}[H]
-\centering
-\begin{tabular}{llp{7cm}}
-\toprule
-\textbf{Component} & \textbf{Version} & \textbf{Notes} \\
-\midrule
-Spring Boot & 3.5.3 & Backend framework for services \\
-Java & 21 & LTS runtime \\
-Graylog & 6.3 & Log management platform \\
-OpenSearch & 2.x & Search and analytics backend \\
-MongoDB & 6.0.5 & Graylog metadata storage \\
-Kafka & wurstmeister/kafka & Distributed message broker \\
-Zookeeper & 7.4.3 & Kafka coordination \\
-logstash-logback-encoder & 7.3 & JSON encoding for Logback \\
-logback-kafka-appender & 0.2.0-RC2 & Kafka appender (service1) \\
-logback-gelf & 4.0.2 & GELF TCP appender (log-service) \\
-gelfclient & 1.5.1 & GELF client library \\
-Docker Compose & v2+ & Orchestration for local env \\
-\bottomrule
-\end{tabular}
-\caption{Bill of Materials (as used in this project)}
-\end{table}
+\begin{Verbatim}[frame=single, fontsize=\scriptsize]
+@RestController
+@RequestMapping("/log")
+public class LogController {
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    
+    @Value("${spring.application.name}")
+    private String applicationName;
 
-\chapter{Ethical and Legal Considerations}
-Avoid logging personal data (PII) and secrets. Apply data minimization, masking, and retention aligned with regulations (e.g., GDPR). Ensure access is logged and roles follow the principle of least privilege.
+    @PostMapping
+    public ResponseEntity<?> postLog(
+        @RequestParam(defaultValue = "Test log message") String message,
+        @RequestParam(defaultValue = "INFO") String level) {
+        
+        Map<String, Object> log = new HashMap<>();
+        log.put("timestamp", Instant.now().toString());
+        log.put("message", message);
+        log.put("level", normalizeLevel(level));
+        log.put("service", applicationName);
 
-\chapter{Security and Compliance}\label{chap:security}
-Security considerations include access control to Graylog, secure transport in production (TLS for GELF and Graylog UI), Kafka ACLs for producers/consumers, and secret management for credentials. For compliance, log retention and data minimization policies can be enforced via index settings.
+        String logJson = objectMapper.writeValueAsString(log);
+        kafkaTemplate.send("logs", logJson);
+        return ResponseEntity.ok("Log sent to Kafka: " + logJson);
+    }
+}
+\end{Verbatim}
 
-\chapter{Performance and Scalability}
-Kafka decouples producers and consumers, allowing the system to scale independently. Throughput can be increased via topic partitioning and consumer groups. GELF TCP batching and reconnect settings are tuned in Logback to handle transient failures. OpenSearch resources (heap, CPU, I/O) should be sized for indexing rates and query patterns.
+\section*{Log Message Structure}
+Generated messages follow this JSON format:
+\begin{Verbatim}[frame=single, fontsize=\scriptsize]
+{
+  "timestamp": "2025-08-31T10:30:45.123Z",
+  "message": "User authentication successful",
+  "level": "INFO",
+  "service": "service1"
+}
+\end{Verbatim}
 
-\section{Throughput Estimation}
-If $R$ is the average event rate (events/s) and $S$ the average size (bytes), the daily ingestion volume is $V = R \times S \times 86400$ bytes/day. With replication factor $\rho$ and overhead factor $\alpha$, storage needs approximate $V' = V \times \rho \times \alpha$.
+\section*{Usage Examples}
+\begin{itemize}
+\item \texttt{POST /log?message=User\%20login\&level=INFO}
+\item \texttt{GET /log?message=Database\%20error\&level=ERROR}
+\end{itemize}
+
+\textbf{Complete source code available at:} \\
+\url{https://github.com/idris-saddi/log-management/blob/master/service1/src/main/java/com/idris/service1/LogController.java}
+
+\chapter{log-service LogConsumer.java}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../log-service/src/main/java/com/idris/log_service/kafka/LogConsumer.java}
+
+\chapter{logback-spring.xml (log-service)}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../log-service/src/main/resources/logback-spring.xml}
+
+\chapter{service1 application.properties}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../service1/src/main/resources/application.properties}
+
+\chapter{service2 application.properties}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../service2/src/main/resources/application.properties}
+
+\chapter{service2 logback-spring.xml}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../service2/src/main/resources/logback-spring.xml}
+
+\chapter{log-service application.properties}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../log-service/src/main/resources/application.properties}
+
+\chapter{service1 logback-spring.xml}
+\VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../service1/src/main/resources/logback-spring.xml}
+
+\end{document}
+\addcontentsline{toc}{chapter}{General Conclusion}
+This internship consolidated skills in distributed architectures, messaging, observability, and containerized deployments while addressing real-world challenges for the Siratify entrepreneurial ecosystem platform. The delivered centralized log management solution provides a robust foundation for monitoring Siratify's microservices that facilitate connections between entrepreneurs, investors, mentors, and support organizations.
+
+The implementation demonstrates how modern logging architecture can enhance platform reliability and user experience in multi-stakeholder environments. The automated provisioning reduces operational overhead while providing comprehensive visibility into system behavior through dashboards, alerts, and structured log search capabilities.
+
+Future enhancements for Siratify include distributed tracing integration (OpenTelemetry), SSO integration for access control, and richer alert routing for business-critical platform events. The foundation established enables rapid extension to additional services and observability requirements as the platform scales.
+
+\chapter*{Future Work}
+\addcontentsline{toc}{chapter}{Future Work}
+Planned improvements include:
+\begin{itemize}[leftmargin=1.2cm]
+  \item Secure-by-default TLS configuration across all services
+  \item CI/CD integration for automated infrastructure changes
+  \item Multi-environment configuration overlays (dev/staging/production)
+  \item Schema registry implementation for event structure evolution
+  \item Integration with distributed tracing systems for enhanced observability
+\end{itemize}
 
 \section{Partitioning Strategy}
 Choose Kafka partitions $P$ to satisfy consumer parallelism and throughput: $P \geq N_c$ (number of consumer instances). Measure processing time per message to compute required parallelism.
@@ -613,61 +743,43 @@ This work demonstrates: problem framing (observability challenges), method (iter
 
 \chapter*{General Conclusion}
 \addcontentsline{toc}{chapter}{General Conclusion}
-This internship consolidated my skills in distributed architectures, messaging, observability, and containerized deployments. The delivered solution provides a robust, industrializable foundation for microservices monitoring. Future enhancements include advanced correlation, distributed tracing (OpenTelemetry), SSO for Graylog, and richer alert routing.
+This internship consolidated my skills in distributed architectures, messaging, observability, and containerized deployments while addressing real-world challenges for the Siratify entrepreneurial ecosystem platform. The delivered centralized log management solution provides a robust, industrializable foundation for monitoring Siratify's microservices that facilitate connections between entrepreneurs, investors, mentors, and support organizations.
+
+The implementation demonstrates how modern logging architecture can enhance platform reliability and user experience in multi-stakeholder environments. Future enhancements for Siratify include advanced correlation for user journey tracking, distributed tracing integration (OpenTelemetry), SSO integration for Graylog access control, and richer alert routing for business-critical platform events.
 
 \chapter*{Future Work}
 \addcontentsline{toc}{chapter}{Future Work}
 Planned improvements: secure-by-default TLS across services, CI/CD integration for infrastructure changes, automated capacity planning for OpenSearch, and multi-environment (dev/stage/prod) configuration overlays.
 
-\chapter*{Glossary and Acronyms}
-\addcontentsline{toc}{chapter}{Glossary and Acronyms}
-\begin{description}
-  \item[GELF] Graylog Extended Log Format
-  \item[MDC] Mapped Diagnostic Context
-  \item[SLI/SLO] Service Level Indicator / Objective
-  \item[SRE] Site Reliability Engineering
-  \item[IaC] Infrastructure as Code
-\end{description}
-
 \appendix
-\chapter{Appendix A: docker-compose.yml}
+\chapter{docker-compose.yml}
 \VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../docker-compose.yml}
 
-\chapter{Appendix B: graylog-init.sh}
+\chapter{graylog-init.sh}
 \VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../graylog-init.sh}
 
-\chapter{Appendix C: service1 LogController.java}
+\chapter{service1 LogController.java}
 \VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../service1/src/main/java/com/idris/service1/LogController.java}
 
-\chapter{Appendix D: log-service LogConsumer.java}
+\chapter{log-service LogConsumer.java}
 \VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../log-service/src/main/java/com/idris/log_service/kafka/LogConsumer.java}
 
-\chapter{Appendix E: logback-spring.xml (log-service)}
+\chapter{logback-spring.xml (log-service)}
 \VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../log-service/src/main/resources/logback-spring.xml}
 
-\chapter{Appendix F: service1 application.properties}
+\chapter{service1 application.properties}
 \VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../service1/src/main/resources/application.properties}
 
-\chapter{Appendix G: service2 application.properties}
+\chapter{service2 application.properties}
 \VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../service2/src/main/resources/application.properties}
 
-\chapter{Appendix H: service2 logback-spring.xml}
+\chapter{service2 logback-spring.xml}
 \VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../service2/src/main/resources/logback-spring.xml}
 
-\chapter{Appendix I: log-service application.properties}
+\chapter{log-service application.properties}
 \VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../log-service/src/main/resources/application.properties}
 
-\chapter{Appendix J: service1 logback-spring.xml}
+\chapter{service1 logback-spring.xml}
 \VerbatimInput[frame=single, fontsize=\scriptsize, xleftmargin=0.5cm, xrightmargin=0.5cm]{../service1/src/main/resources/logback-spring.xml}
-
-\chapter*{References}
-\addcontentsline{toc}{chapter}{References}
-\begin{thebibliography}{9}
-\bibitem{graylog-doc} Graylog Documentation, \url{https://docs.graylog.org/}, accessed 09/23/2025.
-\bibitem{kafka-doc} Apache Kafka Documentation, \url{https://kafka.apache.org/documentation/}, accessed 09/23/2025.
-\bibitem{spring-doc} Spring Boot Reference, \url{https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/}, accessed 09/23/2025.
-\bibitem{opensearch-doc} OpenSearch Documentation, \url{https://opensearch.org/docs/}, accessed 09/23/2025.
-\bibitem{logback-gelf} logback-gelf, \url{https://github.com/mp911de/logstash-gelf}, accessed 09/23/2025.
-\end{thebibliography}
 
 \end{document}

@@ -1,38 +1,16 @@
 \babel@toc {english}{}\relax 
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {1.1}{\ignorespaces Project Gantt chart}}{4}{figure.caption.7}%
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Project Gantt chart for Siratify log management system implementation}}{4}{figure.caption.7}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces System architecture showing the complete log management pipeline from microservices through Kafka to Graylog stack}}{7}{figure.caption.8}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Sequence diagram detailing the end-to-end log processing flow from generation to visualization}}{8}{figure.caption.9}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Docker-based deployment topology showing container orchestration and network configuration}}{9}{figure.caption.10}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {6.1}{\ignorespaces Minimal producer event structure (service1/service2)}}{13}{figure.caption.9}%
-\addvspace {10\p@ }
-\contentsline {figure}{\numberline {7.1}{\ignorespaces Excerpt: service1 LogController (publishing to Kafka)}}{16}{figure.caption.12}%
-\contentsline {figure}{\numberline {7.2}{\ignorespaces Excerpt: log-service Kafka consumer}}{16}{figure.caption.13}%
-\contentsline {figure}{\numberline {7.3}{\ignorespaces Automation script responsibilities}}{17}{figure.caption.14}%
-\addvspace {10\p@ }
-\contentsline {figure}{\numberline {8.1}{\ignorespaces docker-compose.yml overview}}{18}{figure.caption.15}%
-\contentsline {figure}{\numberline {8.2}{\ignorespaces Logback GELF appender (log-service)}}{18}{figure.caption.16}%
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
+\contentsline {figure}{\numberline {6.1}{\ignorespaces Excerpt: log-service Kafka consumer}}{14}{figure.caption.11}%
+\contentsline {figure}{\numberline {6.2}{\ignorespaces Automation script responsibilities}}{14}{figure.caption.12}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
